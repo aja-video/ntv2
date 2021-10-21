@@ -1,6 +1,6 @@
 # AJA NTV2 SDK (MIT license)
 
-## Building the ajantv2 library with CMake + ninja build [CMake](https://cmake.org/) and [ninja build](https://ninja-build.org/) on Windows/macOS/Linux
+## Building the ajantv2 library with [CMake](https://cmake.org/) and [ninja build](https://ninja-build.org/) on Windows/macOS/Linux
 
 1. Download and install CMake 3.10 or higher and place it in your *PATH* on the filesystem. CMake is available on all three major platforms supported by ajantv2 (Windows, macOS, Linux).
     + **Windows** - Download and install the CMake x64 .msi installer:
