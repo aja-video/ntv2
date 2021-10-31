@@ -1,5 +1,7 @@
 project(ajantv2)
 
+include(GNUInstallDirs)
+
 if(CMAKE_CXX_STANDARD LESS 11)
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
@@ -87,9 +89,11 @@ set(AJANTV2_HEADERS
     includes/ntv2videodefines.h
     includes/ntv2virtualregisters.h
     includes/ntv2vpid.h
-    includes/ntv2vpidfromspec.h
+    includes/ntv2vpidfromspec.h)
     # TODO(paulh): Re-enable when we start using the CMake version.h.in file
-    # includes/version.h
+    # includes/version.h)
+
+set(AJAANC_HEADERS
     ${AJAANC_ROOT}/includes/ancillarydata.h
     ${AJAANC_ROOT}/includes/ancillarydatafactory.h
     ${AJAANC_ROOT}/includes/ancillarydata_cea608.h
@@ -105,6 +109,7 @@ set(AJANTV2_HEADERS
     ${AJAANC_ROOT}/includes/ancillarydata_timecode_atc.h
     ${AJAANC_ROOT}/includes/ancillarydata_timecode_vitc.h
     ${AJAANC_ROOT}/includes/ancillarylist.h)
+
 
 set(AJANTV2_SOURCES
     src/ntv2anc.cpp
@@ -202,7 +207,7 @@ if (AJA_BUILD_OPENSOURCE STREQUAL OFF)
         codecs/hevc/m31/ntv2m31viparam.cpp)
 endif()
 
-set(AJABASE_HEADERS
+set(AJABASE_COMMON_HEADERS
     ${AJABASE_ROOT}/common/ajarefptr.h
     ${AJABASE_ROOT}/common/audioutilities.h
     ${AJABASE_ROOT}/common/buffer.h
@@ -227,13 +232,21 @@ set(AJABASE_HEADERS
     ${AJABASE_ROOT}/common/types.h
     ${AJABASE_ROOT}/common/videotypes.h
     ${AJABASE_ROOT}/common/videoutilities.h
-    ${AJABASE_ROOT}/common/wavewriter.h
+    ${AJABASE_ROOT}/common/wavewriter.h)
+
+set(AJABASE_NETWORK_HEADERS
     ${AJABASE_ROOT}/network/ip_socket.h
     ${AJABASE_ROOT}/network/tcp_socket.h
-    ${AJABASE_ROOT}/network/udp_socket.h
+    ${AJABASE_ROOT}/network/udp_socket.h)
+
+set(AJABASE_PERSISTENCE_HEADERS
     ${AJABASE_ROOT}/persistence/persistence.h
-    ${AJABASE_ROOT}/persistence/sqlite3.h
-    ${AJABASE_ROOT}/pnp/pnp.h
+    ${AJABASE_ROOT}/persistence/sqlite3.h)
+
+set(AJABASE_PNP_HEADERS
+    ${AJABASE_ROOT}/pnp/pnp.h)
+
+set(AJABASE_SYSTEM_HEADERS
     ${AJABASE_ROOT}/system/atomic.h
     ${AJABASE_ROOT}/system/debug.h
     ${AJABASE_ROOT}/system/debugshare.h
@@ -322,14 +335,22 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         # src/win/dllmain.cpp
         src/win/ntv2windriverinterface.cpp)
 
-    set(AJABASE_HEADERS
-        ${AJABASE_HEADERS}
-        ${AJABASE_ROOT}/pnp/windows/pnpimpl.h
+    set(AJABASE_OS_SYSTEM_HEADERS
         ${AJABASE_ROOT}/system/windows/eventimpl.h
         ${AJABASE_ROOT}/system/windows/infoimpl.h
         ${AJABASE_ROOT}/system/windows/lockimpl.h
         ${AJABASE_ROOT}/system/windows/processimpl.h
-        ${AJABASE_ROOT}/system/windows/threadimpl.h)
+        ${AJABASE_ROOT}/system/windows/threadimpl.h)    
+
+    set(AJABASE_OS_PNP_HEADERS
+        ${AJABASE_ROOT}/pnp/windows/pnpimpl.h)
+
+    set(AJABASE_OS_HEADERS
+        ${AJABASE_OS_SYSTEM_HEADERS}
+        ${AJABASE_OS_PNP_HEADERS})
+
+    install(FILES ${AJABASE_OS_SYSTEM_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/windows)
+    install(FILES ${AJABASE_OS_PNP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
 
     set(AJABASE_SOURCES
         ${AJABASE_SOURCES}
@@ -370,14 +391,22 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJANTV2_SOURCES}
         src/lin/ntv2linuxdriverinterface.cpp)
 
-    set(AJABASE_HEADERS
-        ${AJABASE_HEADERS}
-        ${AJABASE_ROOT}/pnp/linux/pnpimpl.h
+    set(AJABASE_OS_SYSTEM_HEADERS
         ${AJABASE_ROOT}/system/linux/eventimpl.h
         ${AJABASE_ROOT}/system/linux/infoimpl.h
         ${AJABASE_ROOT}/system/linux/lockimpl.h
         ${AJABASE_ROOT}/system/linux/processimpl.h
-        ${AJABASE_ROOT}/system/linux/threadimpl.h)
+        ${AJABASE_ROOT}/system/linux/threadimpl.h)    
+
+    set(AJABASE_OS_PNP_HEADERS
+        ${AJABASE_ROOT}/pnp/linux/pnpimpl.h)
+
+    set(AJABASE_OS_HEADERS
+        ${AJABASE_OS_SYSTEM_HEADERS}
+        ${AJABASE_OS_PNP_HEADERS})
+
+    install(FILES ${AJABASE_OS_SYSTEM_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/linux)
+    install(FILES ${AJABASE_OS_PNP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/linux)
 
     set(AJABASE_SOURCES
         ${AJABASE_SOURCES}
@@ -415,17 +444,25 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${AJANTV2_SOURCES}
         src/mac/ntv2macdriverinterface.cpp)
 
-    set(AJABASE_HEADERS
-        ${AJABASE_HEADERS}
+    set(AJABASE_OS_PNP_HEADERS
         ${AJABASE_ROOT}/pnp/mac/devicenotifier.h
         ${AJABASE_ROOT}/pnp/mac/masterport.h
-        ${AJABASE_ROOT}/pnp/mac/pnpimpl.h
+        ${AJABASE_ROOT}/pnp/mac/pnpimpl.h)
+
+    set(AJABASE_OS_SYSTEM_HEADERS
         ${AJABASE_ROOT}/system/mac/eventimpl.h
         ${AJABASE_ROOT}/system/mac/infoimpl.h
         ${AJABASE_ROOT}/system/mac/lockimpl.h
         ${AJABASE_ROOT}/system/mac/processimpl.h
         ${AJABASE_ROOT}/system/mac/pthreadsextra.h
-        ${AJABASE_ROOT}/system/mac/threadimpl.h)
+        ${AJABASE_ROOT}/system/mac/threadimpl.h)    
+
+    set(AJABASE_OS_HEADERS
+        ${AJABASE_OS_SYSTEM_HEADERS}
+        ${AJABASE_OS_PNP_HEADERS})
+
+    install(FILES ${AJABASE_OS_SYSTEM_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/mac)
+    install(FILES ${AJABASE_OS_PNP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/mac)
 
     set(AJABASE_SOURCES
         ${AJABASE_SOURCES}
@@ -453,7 +490,13 @@ set(AJANTV2_TARGET_SOURCES
     ${AJANTV2_SOURCES}
     ${AJANTV2_HEADERS}
     ${AJABASE_SOURCES}
-    ${AJABASE_HEADERS})
+    ${AJAANC_HEADERS}
+    ${AJABASE_OS_HEADERS}
+    ${AJABASE_COMMON_HEADERS}
+    ${AJABASE_NETWORK_HEADERS}
+    ${AJABASE_PERSISTENCE_HEADERS}
+    ${AJABASE_PNP_HEADERS}
+    ${AJABASE_SYSTEM_HEADERS})
 
 add_library(ajantv2shared SHARED ${AJANTV2_TARGET_SOURCES})
 add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
@@ -466,3 +509,25 @@ target_link_libraries(ajantv2 PUBLIC ${EXTRA_LIBRARIES})
 
 target_compile_definitions(ajantv2shared PUBLIC ${EXTRA_DYNAMIC_DEFINES})
 target_compile_definitions(ajantv2 PUBLIC ${EXTRA_STATIC_DEFINES})
+
+add_library(ajabase INTERFACE)
+set_target_properties(ajabase PROPERTIES PUBLIC_HEADER "${AJABASE_HEADERS}")
+install(TARGETS ajabase
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase)
+
+install(FILES ${AJABASE_COMMON_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/common)
+install(FILES ${AJABASE_NETWORK_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/network)
+install(FILES ${AJABASE_PERSISTENCE_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/persistence)
+install(FILES ${AJABASE_PNP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp)
+install(FILES ${AJABASE_SYSTEM_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system)
+
+install(FILES ${AJAANC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajaanc/include)
+
+set_target_properties(ajantv2 PROPERTIES PUBLIC_HEADER "${AJANTV2_HEADERS}")
+
+install(TARGETS ajantv2
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2)
