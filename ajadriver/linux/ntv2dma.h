@@ -161,6 +161,7 @@ typedef struct _dmaParams
 	ULWord				ancF2Frame;				// anc field 2 frame
 	ULWord				ancF2NumBytes;			// number of anc field 2 bytes
 	ULWord				ancF2Offset;			// anc field 2 frame offset
+	ULWord				audioSystemCount;		// number of multi-link audio systems
 } DMA_PARAMS, *PDMA_PARAMS;
 
 // video scatter list to descriptor map
@@ -180,16 +181,23 @@ typedef struct _dmaVideoSegment
 } DMA_VIDEO_SEGMENT, *PDMA_VIDEO_SEGMENT;
 
 // audio scatter list to descriptor map
+#define MAX_NUM_AUDIO_LINKS 4
 typedef struct _dmaAudioSegment
 {
-	ULWord				ringAddress;			// ring buffer address
-	ULWord				ringSize;				// ring buffer size
-	ULWord	   			audioOffset;			// audio transfer offset
-	ULWord				audioSize;				// audio transfer size
-	ULWord64			transferAddress;		// scatter transfer address
-	ULWord				transferSize;			// scatter transfer size
-	ULWord				systemOffset;			// system bytes transferred
-	ULWord				transferOffset;			// scatter bytes transferred
+	//ULWord			engIndex;
+	ULWord				systemSize;							// dma system buffer size
+	ULWord				transferSize;						// audio transfer size
+	ULWord				ringAddress[MAX_NUM_AUDIO_LINKS];	// ring buffer address
+	ULWord				ringCount;							// number of rings
+	ULWord				ringSize;							// ring buffer size
+	ULWord64			pageAddress;						// page address
+	ULWord				pageSize;							// page size
+	ULWord				audioStart;							// audio transfer start offset
+	ULWord				audioSize;							// audio size
+	ULWord				ringIndex;							// transfer ring index
+	ULWord				systemOffset;						// system transfer bytes
+	ULWord				pageOffset;							// page transfer bytes
+	ULWord	   			audioOffset;						// audio transfer bytes
 } DMA_AUDIO_SEGMENT, *PDMA_AUDIO_SEGMENT;
 
 // anc scatter list to descriptor map

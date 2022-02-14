@@ -1164,9 +1164,9 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 	deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
 	hdmiVersion = NTV2GetHDMIVersion(deviceID);
 	
-	if(hdmiVersion == 0)
+	if (hdmiVersion == 0)
 		return false;
-	if(hdmiVersion == 1)
+	if (hdmiVersion == 1)
 		return SetLHiHDMIOutputStandard(context);
 
 	memset(&hdrRegValues, 0, sizeof(HDRDriverValues));
@@ -1175,13 +1175,13 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 	{
 		return false;
 	}
-	if(xptSelect == NTV2_XptConversionModule)
+	if (xptSelect == NTV2_XptConversionModule)
 	{
-		if(!GetConverterOutStandard(context, &standard))
+		if (!GetConverterOutStandard(context, &standard))
 		{
 			return false;
 		}
-		if(!GetK2ConverterOutFormat(context, &videoFormat))
+		if (!GetK2ConverterOutFormat(context, &videoFormat))
 		{
 			return false;
 		}
@@ -1202,7 +1202,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 	}
 
 	videoRate = GetNTV2FrameRateFromVideoFormat(videoFormat);
-	if(videoRate == NTV2_FRAMERATE_UNKNOWN)
+	if (videoRate == NTV2_FRAMERATE_UNKNOWN)
 	{
 		return false;
 	}
@@ -1212,23 +1212,29 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 	GetXptHDMIOutInputSelect(context, &tempXptSelect);
 	isSourceRGB = (tempXptSelect & 0x80) != 0 ? true : false;
 	useHDMI420Mode = false;
-	if(hdmiVersion == 2 || hdmiVersion == 4)
+	if (hdmiVersion == 2 || hdmiVersion == 4)
 	{
+		bool isQuadLink = false;
 		NTV2OutputXptID q2connection = NTV2_XptBlack;
 		NTV2OutputXptID q3connection = NTV2_XptBlack;
 		NTV2OutputXptID q4connection = NTV2_XptBlack;
 		GetXptHDMIOutQ2InputSelect(context, &q2connection);
 		GetXptHDMIOutQ3InputSelect(context, &q3connection);
 		GetXptHDMIOutQ4InputSelect(context, &q4connection);
-		if((q2connection != NTV2_XptBlack && q3connection != NTV2_XptBlack && q4connection != NTV2_XptBlack) || (NTV2DeviceCanDo12gRouting(deviceID) && bFormatIsTSI))
+		if (q2connection != NTV2_XptBlack && q3connection != NTV2_XptBlack && q4connection != NTV2_XptBlack)
+		{
 			is4k = true;
-		if(q2connection != NTV2_XptBlack && q3connection == NTV2_XptBlack && q4connection == NTV2_XptBlack)
+			isQuadLink = true;
+		}
+		if (NTV2DeviceCanDo12gRouting(deviceID) && bFormatIsTSI)
+			is4k = true;
+		if (q2connection != NTV2_XptBlack && q3connection == NTV2_XptBlack && q4connection == NTV2_XptBlack)
 			isLevelB = true;
 		if (hdmiVersion >= 4)
 			useHDMI420Mode = ntv2ReadVirtualRegister(context, kVRegHDMIOutColorSpaceModeCtrl) == kHDMIOutCSCYCbCr8bit ? true : false;
 		if (HasMultiRasterWidget(context))
 		{
-			if (IsMultiRasterEnabled(context))
+			if (isQuadLink)
 			{
 				NTV2OutputXptID mrXptSelect;
 				NTV2VideoFormat mrVideoFormat;
@@ -1766,6 +1772,7 @@ bool GetSourceVideoFormat(Ntv2SystemContext* context, NTV2VideoFormat* format, N
 	case NTV2_XptSDIIn8DS2:
 		videoFormat = GetInputVideoFormat(context, GetOutXptChannel(crosspoint, multiFormatActive));
 		ReadFSHDRRegValues(context, NTV2_CHANNEL1, hdrRegValues);
+		*quadMode = (GetSDIIn6GEnable(context, GetOutXptChannel(crosspoint, multiFormatActive)) || GetSDIIn12GEnable(context, GetOutXptChannel(crosspoint, multiFormatActive))) ? true : false;
 		break;
 	case NTV2_XptHDMIIn1:
 	case NTV2_XptHDMIIn1Q2:

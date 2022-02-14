@@ -2,10 +2,11 @@
 /**
 	@file		ntv2mcsfile.cpp
 	@brief		Implementation of CNTV2MCSfile class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.    All rights reserved.
+	@copyright	(C) 2010-2021 AJA Video Systems, Inc.	 All rights reserved.
 **/
 #include "ntv2mcsfile.h"
 #include "ntv2bitfile.h"
+#include "ajabase/system/debug.h"
 #include <iostream>
 #include <sys/stat.h>
 #include <assert.h>
@@ -56,10 +57,23 @@ bool CNTV2MCSfile::isReady (void) const
 //		return false;
 }
 
+void CNTV2MCSfile::SetLastError (const string & inStr, const bool inAppend)
+{
+	AJA_sERROR(AJA_DebugUnit_Firmware, inStr);
+	if (inAppend)
+	{
+		if (!mLastError.empty())
+			mLastError += "\n";
+		mLastError += inStr;
+	}
+	else
+		mLastError = inStr;
+}
+
 bool CNTV2MCSfile::Open (const string & inMCSFileName)
 {
 	Close();
-	struct stat	fsinfo;
+	struct stat fsinfo;
 	::stat(inMCSFileName.c_str(), &fsinfo);
 	mFileSize = uint32_t(fsinfo.st_size);
 	
@@ -69,7 +83,7 @@ bool CNTV2MCSfile::Open (const string & inMCSFileName)
 	time(&rawGenerationTime);
 	struct tm * generationTimeInfo = localtime(&rawGenerationTime);
 	ostringstream comment;
-	comment << "Generation Time: " << asctime(generationTimeInfo) << "  Original MCS Time: " << asctime(fileTimeInfo) << endl;
+	comment << "Generation Time: " << asctime(generationTimeInfo) << "	Original MCS Time: " << asctime(fileTimeInfo) << endl;
 	mCommentString = comment.str();
 
 	mMCSFileStream.open(inMCSFileName.c_str(), std::ios::in);
@@ -142,6 +156,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 {
 	CNTV2Bitfile	bitfile;
 	CNTV2MCSfile	mcsFile;
+	ostringstream	oss;
 	char iRecord[100];
 	uint64_t recordSize = 0;
 	UWord baseAddress = 0x0000;
@@ -151,37 +166,41 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 
 	if (!Open(inMCSFileName))
 	{
-		cerr << "## ERROR:  CNTV2MCSfile::InsertBitFile  mcsFile '" << inMCSFileName << "' not found" << endl;
+		oss << "CNTV2MCSfile::InsertBitFile: mcsFile '" << inMCSFileName << "' not found";
+		SetLastError(oss.str());
 		return false;
 	}
 
 	//Read in the bitfile
 	if (!bitfile.Open(inBitFileName))
 	{
-		cerr << "## ERROR:  CNTV2MCSfile::InsertBitFile  Bitfile '" << inBitFileName << "' not found" << endl;
+		oss << "CNTV2MCSfile::InsertBitFile: Bitfile '" << inBitFileName << "' not found";
+		SetLastError(oss.str());
 		return false;
 	}
 
-	size_t	bitfileLength(bitfile.GetFileStreamLength());
-	unsigned char *	bitfileBuffer(new unsigned char[bitfileLength + 512]);
+	const size_t bitfileLength(bitfile.GetFileStreamLength());
+	NTV2_POINTER bitfileBuffer(bitfileLength + 512);
 	if (!bitfileBuffer)
 	{
-		cerr << "## ERROR:  CNTV2MCSfile::InsertBitFile  Unable to allocate bitfile buffer" << endl;
+		oss << "CNTV2MCSfile::InsertBitFile: Unable to allocate " << DEC(bitfileLength+512) << "-byte bitfile buffer";
+		SetLastError(oss.str());
 		return false;
 	}
 
-	::memset(bitfileBuffer, 0xFF, bitfileLength + 512);
-	const size_t	readBytes(bitfile.GetFileByteStream(bitfileBuffer, bitfileLength));
+	bitfileBuffer.Fill(0xFFFFFF);
+	const size_t	readBytes(bitfile.GetFileByteStream(bitfileBuffer));
 	const string	designName(bitfile.GetDesignName());
 	if (readBytes != bitfileLength)
 	{
-		delete [] bitfileBuffer;
-		cerr << "## ERROR:  CNTV2MCSfile::InsertBitFile:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
+		oss << "CNTV2MCSfile::InsertBitFile:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength;
+		SetLastError(oss.str());
 		return false;
 	}
 
 	//	First, write out the bitfile, then add the date and comment, and then the mcs file...
-	uint64_t bytesLeftToWrite = bitfileLength;
+	size_t bitfileBufferNdx(0);
+	uint64_t bytesLeftToWrite (bitfileLength);
 	while (bytesLeftToWrite)
 	{
 		recordSize = bytesLeftToWrite > 16 ? 16 : bytesLeftToWrite;
@@ -194,10 +213,9 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 			//Insert ELAR
 			string ELARString(":02000004000000");
 			::sprintf(&ELARString[9], "%04X", ExtendedBaseAddress);
-			for (i = 1;  i < 13;  i++)
-				checksum += ELARString[i] - 0x30;
+			for (i = 1;	 i < 13;  i++)
+				checksum += UByte(ELARString[i]) - 0x30;
 			checksum = (~checksum) + 1;
-			NTV2StringListIter fileItr;
 			::sprintf(&ELARString[13], "%02X", checksum);
 			IRecordOutput(ELARString.c_str());
 			ExtendedBaseAddress++;
@@ -207,7 +225,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 		iRecord[0] = ':';
 
 		::sprintf(&iRecord[1], "%02X", UByte(recordSize));
-		checksum += (UByte)recordSize;
+		checksum += UByte(recordSize);
 
 		UWord addr = baseAddress;
 		UByte aa = ((addr >> 8) & 0xff);
@@ -222,14 +240,13 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 
 		index = 9;
 
-		while (i < (int)recordSize)
+		while (i < int(recordSize))
 		{
-			unsigned char dd = *bitfileBuffer;
+			unsigned char dd = bitfileBuffer.U8(bitfileBufferNdx++);
 			::sprintf(&iRecord[index], "%02X", dd);
 			checksum += dd;
 			i++;
 			index += 2;
-			bitfileBuffer++;
 			bytesLeftToWrite--;
 		}
 
@@ -238,7 +255,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 		::sprintf(&iRecord[index], "%02X", checksum);
 
 		IRecordOutput(iRecord);
-	}
+	}	//	while bytesLeftToWrite > 0
 
 	//Insert the date at the 3rd to last partition in Bank 2
 	if (!inUserMessage.empty())
@@ -261,10 +278,9 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 			//Insert ELAR
 			string ELARString(":02000004000000");
 			::sprintf(&ELARString[9], "%04X", ExtendedBaseAddress);
-			for (i = 1;  i < 13;  i++)
+			for (i = 1;	 i < 13;  i++)
 				checksum += ELARString[i] - 0x30;
 			checksum = (~checksum) + 1;
-			NTV2StringListIter fileItr;
 			::sprintf(&ELARString[13], "%02X", checksum);
 			IRecordOutput(ELARString.c_str());
 			ExtendedBaseAddress++;
@@ -274,7 +290,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 		iRecord[0] = ':';
 
 		::sprintf(&iRecord[1], "%02X", UByte(recordSize));
-		checksum += (UByte)recordSize;
+		checksum += UByte(recordSize);
 
 		UWord addr = baseAddress;
 		UByte aa = ((addr >> 8) & 0xff);
@@ -288,7 +304,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 		::sprintf(&iRecord[7], "%02X", recordType);
 
 		index = 9;
-		while (i < (int)recordSize)
+		while (i < int(recordSize))
 		{
 			unsigned char dd = mCommentString.at(commentIndex);
 			::sprintf(&iRecord[index], "%02X", dd);
@@ -302,23 +318,22 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 		baseAddress += 0x0010;
 		checksum = (~checksum) + 1;
 		::sprintf(&iRecord[index], "%02X", checksum);
-
 		IRecordOutput(iRecord);
 	}
-
 
 	//Finished with bitfile now just read a line and output a line from the mcs file
 	//32M offset is assumed to be the start of SOC stuff
 	if (!FindExtendedLinearAddressRecord(0x0200))
+	{
+		SetLastError("FindExtendedLinearAddressRecord failed");
 		return false;
+	}
 	mCurrentLocation = mBaseELARLocation;
 	while (mCurrentLocation != mFileLines.end())
 	{
 		IRecordOutput(mCurrentLocation->c_str());
 		mCurrentLocation++;
 	}
-	if (bitfileBuffer)
-		delete [] bitfileBuffer;
 	return true;
 }
 
@@ -332,9 +347,9 @@ void CNTV2MCSfile::IRecordOutput (const char *pIRecord)
 
 // Get maximum of fileLength bytes worth of configuration stream data in buffer.
 // Return value:
-//   number of bytes of data copied into buffer. This can be <= bufferLength
-//   zero means configuration stream has finished.
-//   Return value < 0 indicates error
+//	 number of bytes of data copied into buffer. This can be <= bufferLength
+//	 zero means configuration stream has finished.
+//	 Return value < 0 indicates error
 uint32_t CNTV2MCSfile::GetFileByteStream (uint32_t numberOfLines)
 {
 	const uint32_t maxNumLines = 2000000;
@@ -371,10 +386,9 @@ bool CNTV2MCSfile::FindExtendedLinearAddressRecord (uint16_t address /*= 0x0000*
 	string ELARString(":02000004000000");
 	::sprintf(&ELARString[9], "%04X", address);
 	uint8_t checksum = 0;
-	for (int i = 1;  i < 13;  i++)
+	for (int i = 1;	 i < 13;  i++)
 		checksum += ELARString[i] - 0x30;
 	checksum = (~checksum) + 1;
-	NTV2StringListIter fileItr;
 	::sprintf(&ELARString[13], "%02X", checksum);
 
 	// Do a search for a match, don't search on the checksum
@@ -428,7 +442,7 @@ bool CNTV2MCSfile::ParseCurrentRecord (IntelRecordInfo & recordInfo)
 	uint32_t rType = 0;
 	uint16_t byteCount16 = 0;
 	::sscanf(mCurrentLocation[0].c_str(), ":%02hX%04hX%02X", &byteCount16, &recordInfo.linearAddress, &rType);
-	recordInfo.byteCount = (uint8_t)byteCount16;
+	recordInfo.byteCount = uint8_t(byteCount16);
 	recordInfo.segmentAddress = 0; //Fix this for the correct base address
 	switch (rType)
 	{
@@ -439,7 +453,7 @@ bool CNTV2MCSfile::ParseCurrentRecord (IntelRecordInfo & recordInfo)
 
 		case 0x04:		recordInfo.recordType = IRT_ELAR;
 						::sscanf(mCurrentLocation[0].c_str(), ":%02hX%04hX%02X%04hX", &byteCount16, &recordInfo.linearAddress, &rType, &recordInfo.linearAddress);
-						recordInfo.byteCount = (uint8_t)byteCount16;
+						recordInfo.byteCount = uint8_t(byteCount16);
 						break;
 	}
 	return true;
@@ -474,7 +488,7 @@ uint32_t CNTV2MCSfile::GetPartition (UByteSequence & partitionBuffer, uint16_t b
 	while (recordInfo.recordType == IRT_DR)
 	{
 		string temp(mCurrentLocation[0].c_str());
-		for (int i(0);  i < recordInfo.byteCount*2;  i+=2)
+		for (int i(0);	i < recordInfo.byteCount*2;	 i+=2)
 		{
 			uint32_t c = 0;
 			::sscanf(&mCurrentLocation[0].c_str()[9 + i], "%02X", &c);

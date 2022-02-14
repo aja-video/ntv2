@@ -413,6 +413,18 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
+	{  // TTAPPRO
+	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_TTAPPRO,			// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
+	{  // IOX3
+	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_IOX3,				// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
 
 #if defined(AJA_HEVC)
     {  // CORVIDHEVC K7
@@ -2054,6 +2066,8 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 		return -ENODEV;
 	}
 
+//	MSG("%s: release: device %d \n", getNTV2ModuleParams()->name, deviceNumber);
+	
 	pFileData = (PFILE_DATA)mfile->private_data;
 	if (pFileData != NULL)
 	{
@@ -3276,7 +3290,10 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 		(ntv2pp->_DeviceID == DEVICE_ID_KONA5_8KMK) ||
 		(ntv2pp->_DeviceID == DEVICE_ID_KONA5_8K) ||
 		(ntv2pp->_DeviceID == DEVICE_ID_KONA5_3DLUT) ||
-		(ntv2pp->_DeviceID == DEVICE_ID_KONA5_2X4K))
+		(ntv2pp->_DeviceID == DEVICE_ID_KONA5_2X4K) ||
+		(DEVICE_IS_KONA5_OE(ntv2pp->_DeviceID)) ||
+		(DEVICE_IS_SOJI(ntv2pp->_DeviceID)) ||
+		(ntv2pp->_DeviceID == DEVICE_ID_TTAP_PRO))
     {
 #if 0
 		struct ntv2_genlock *pGenlock = ntv2_genlock_open(&ntv2pp->systemContext, "ntv2genlock", 0);

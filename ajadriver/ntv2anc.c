@@ -647,7 +647,7 @@ bool SetAncInsReadParams(Ntv2SystemContext* context, NTV2Channel channel, ULWord
 		ULWord i;
 		for (i = 0; i < NTV2DeviceGetNumVideoOutputs(deviceID); i++)
 		{
-			if(deviceID == DEVICE_ID_IOIP_2110 && (NTV2Channel)i == NTV2_CHANNEL5)
+			if((deviceID == DEVICE_ID_IOIP_2110 || deviceID == DEVICE_ID_IOIP_2110_RGB12) && (NTV2Channel)i == NTV2_CHANNEL5)
 			{
 				ANCStartMemory = frameLocation - ntv2ReadVirtualRegister(context, kVRegMonAncField1Offset);
 				ancField1Size = ntv2ReadVirtualRegister(context, kVRegMonAncField1Offset) - ntv2ReadVirtualRegister(context, kVRegAncField2Offset);
@@ -681,7 +681,7 @@ bool SetAncInsReadField2Params(Ntv2SystemContext* context, NTV2Channel channel, 
 		ULWord i;
 		for (i = 0; i < NTV2DeviceGetNumVideoOutputs(deviceID); i++)
 		{
-			if(deviceID == DEVICE_ID_IOIP_2110 && (NTV2Channel)i == NTV2_CHANNEL5)
+			if((deviceID == DEVICE_ID_IOIP_2110 || deviceID == DEVICE_ID_IOIP_2110_RGB12) && (NTV2Channel)i == NTV2_CHANNEL5)
 			{
 				ANCStartMemory = frameLocation - ntv2ReadVirtualRegister(context, kVRegMonAncField2Offset);
 			}

@@ -1,6 +1,7 @@
 set(AJA_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 set(AJA_APPS_ROOT ${AJA_CMAKE_DIR}/../ajaapps)
+set(AJA_DRIVER_ROOT ${AJA_CMAKE_DIR}/../ajadriver)
 set(AJA_LIBRARIES_ROOT ${AJA_CMAKE_DIR}/../ajalibraries)
 set(AJA_PLUGINS_ROOT ${AJA_CMAKE_DIR}/../ajaplugins)
 set(AJA_QA_ROOT ${AJA_CMAKE_DIR}/../qa)

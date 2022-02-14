@@ -81,11 +81,11 @@
 static uint32_t ntv2_debug_mask =
 //	NTV2_DEBUG_STATE |
 //	NTV2_DEBUG_STATISTICS |
-//	NTV2_DEBUG_TRANSFER |
+//  NTV2_DEBUG_TRANSFER |
 //	NTV2_DEBUG_PAGE_MAP |
 //	NTV2_DEBUG_PROGRAM |
 //	NTV2_DEBUG_VIDEO_SEGMENT |
-//	NTV2_DEBUG_DESCRIPTOR |
+//  NTV2_DEBUG_DESCRIPTOR |
 	NTV2_DEBUG_INFO | 
 	NTV2_DEBUG_ERROR;
 
@@ -248,14 +248,15 @@ static inline bool dmaVideoSegmentDescriptor(PDMA_CONTEXT pDmaContext,
 static bool dmaAudioSegmentInit(PDMA_CONTEXT pDmaContext, PDMA_AUDIO_SEGMENT pDmaSegment);
 static bool dmaAudioSegmentConfig(PDMA_CONTEXT pDmaContext,
 								  PDMA_AUDIO_SEGMENT pDmaSegment,
-								  ULWord ringAddress,
+								  ULWord systemSize,
+								  ULWord transferSize,
+								  ULWord* pRingAddress,
 								  ULWord ringSize,
-								  ULWord audioOffset,
-								  ULWord audioSize);
+								  ULWord audioStart);
 static inline bool dmaAudioSegmentTransfer(PDMA_CONTEXT pDmaContext,
 										   PDMA_AUDIO_SEGMENT pDmaSegment,
-										   ULWord64 transferAddress, 
-										   ULWord transferSize);
+										   ULWord64 pageAddress, 
+										   ULWord pageSize);
 static inline bool dmaAudioSegmentDescriptor(PDMA_CONTEXT pDmaContext,
 											 PDMA_AUDIO_SEGMENT pDmaSegment,
 											 ULWord64* pSystemAddress, 
@@ -298,6 +299,10 @@ int dmaInit(ULWord deviceNumber)
 	}
 
 	NTV2_MSG_INFO("%s%d: dmaInit begin\n", DMA_MSG_DEVICE);
+
+#ifdef AJA_RDMA
+	NTV2_MSG_INFO("%s%d: can do rdma\n", DMA_MSG_DEVICE);
+#endif	
 
 	for (iEng = 0; iEng < NTV2_NUM_DMA_ENGINES; iEng++)
 	{
@@ -798,7 +803,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 	ULWord videoCardAddress = 0;
 	ULWord videoCardBytes = 0;
 	ULWord messageCardAddress = 0;
-	ULWord audioFrameOffset = 0;
+	ULWord audioRingOffset = 0;
 	ULWord audioCardBytes = 0;
 	ULWord audioRingAddress = 0;
 	ULWord audioRingSize = 0;
@@ -847,9 +852,9 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
  	NTV2_MSG_TRANSFER("%s%d:%s%d: dmaTransfer frameOffset %d  vidUserPitch %d  framePitch %d  numSegments %d\n",
 					  DMA_MSG_ENGINE, pDmaParams->frameOffset, pDmaParams->vidUserPitch, 
 					  pDmaParams->vidFramePitch, pDmaParams->numSegments);
- 	NTV2_MSG_TRANSFER("%s%d:%s%d: dmaTransfer pAudUserVa %016llx  audioSystem %d  audNumBytes %d  audOffset %d\n",
+ 	NTV2_MSG_TRANSFER("%s%d:%s%d: dmaTransfer pAudUserVa %016llx  audioSystem %d  audNumBytes %d  audOffset %d	audioSystemCount %d\n",
 					  DMA_MSG_ENGINE, (ULWord64)pDmaParams->pAudUserVa, pDmaParams->audioSystem, 
-					  pDmaParams->audNumBytes, pDmaParams->audOffset);
+					  pDmaParams->audNumBytes, pDmaParams->audOffset, pDmaParams->audioSystemCount);
  	NTV2_MSG_TRANSFER("%s%d:%s%d: dmaTransfer pAncF1UserVa %016llx  ancF1Frame %d  ancF1NumBytes %d  ancF1Offset %d\n",
 					  DMA_MSG_ENGINE, (ULWord64)pDmaParams->pAncF1UserVa, pDmaParams->ancF1Frame,
 					  pDmaParams->ancF1NumBytes, pDmaParams->ancF1Offset);
@@ -1137,11 +1142,19 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 		dmaAudioSegmentInit(pDmaContext, &pDmaContext->dmaAudioSegment);
 
 		// enforce 4 byte alignment
-		audioFrameOffset = pDmaParams->audOffset & 0xfffffffc;
-		audioCardBytes = pDmaParams->audNumBytes & 0xfffffffc;
-
-		// verify audio buffer
-		if((pDmaParams->pAudUserVa == NULL) || (audioCardBytes == 0))
+		if ((pDmaParams->audioSystemCount > 0) ||
+			(pDmaParams->audioSystemCount <= MAX_NUM_AUDIO_LINKS))
+		{
+			audioRingOffset = pDmaParams->audOffset & 0xfffffffc;
+            audioCardBytes = pDmaParams->audNumBytes & 0xfffffffc;
+			
+			// verify audio buffer
+			if((pDmaParams->pAudUserVa == NULL) || (audioCardBytes == 0))
+			{
+				hasAudio = false;
+			}
+		}
+		else
 		{
 			hasAudio = false;
 		}
@@ -1222,12 +1235,22 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 			// configure the dma transfer
 			if (hasAudio)
 			{
+				ULWord pAddress[MAX_NUM_AUDIO_LINKS];
+				ULWord i = 0;
+				for (i = 0; i < MAX_NUM_AUDIO_LINKS; i++)
+				{
+					if (i < pDmaParams->audioSystemCount)
+						pAddress[i] = audioRingAddress - (i * NTV2_AUDIO_BUFFEROFFSET_BIG);
+					else
+						pAddress[i] = 0;
+				}
 				if(dmaAudioSegmentConfig(pDmaContext,
 										 &pDmaContext->dmaAudioSegment,
-										 audioRingAddress,
+										 pAudioPageBuffer->userSize,
+										 audioCardBytes,
+										 pAddress,
 										 audioRingSize,
-										 audioFrameOffset,
-										 audioCardBytes))
+										 audioRingOffset))
 				{
 					doAudio = true;
 				}
@@ -2267,7 +2290,7 @@ int dmaPageRootAdd(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 	}
 
 	// map buffer
-	if (map && !rdma)
+	if (map)
 	{
 		ret = dmaSgMap(deviceNumber, pBuffer);
 		if (ret < 0)
@@ -2734,15 +2757,15 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 
 	if (pBuffer->pageLock)
 	{
-		NTV2_MSG_PAGE_MAP("%s%d: dmaPageUnlock unlock %d pages\n", 
-						  DMA_MSG_DEVICE, pBuffer->numPages); 
-
 #ifdef AJA_RDMA
 		if (pBuffer->rdma)
 		{
 			if ((pBuffer->rdmaAddress == 0) || (pBuffer->rdmaPage == NULL))
 				return;
 			
+			NTV2_MSG_PAGE_MAP("%s%d: dmaPageUnlock rdma unlock %d pages\n", 
+							  DMA_MSG_DEVICE, pBuffer->numPages); 
+
 			nvidia_p2p_put_pages(
 #ifndef AJA_IGPU				
 				0, 0,
@@ -2755,6 +2778,9 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 #endif
 		if (pBuffer->rdma || (pBuffer->pPageList == NULL))
 			return;
+
+		NTV2_MSG_PAGE_MAP("%s%d: dmaPageUnlock unlock %d pages\n", 
+						  DMA_MSG_DEVICE, pBuffer->numPages); 
 
 		// release the locked pages
 		for (i = 0; i < pBuffer->numPages; i++)
@@ -2978,13 +3004,14 @@ static void dmaSgUnmap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 
 	if (pBuffer->sgMap)
 	{
-		NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap unmap %d segments\n", 
-						  DMA_MSG_DEVICE, pBuffer->numSgs); 
 #ifdef AJA_RDMA
 		if (pBuffer->rdma)
 		{
 			if ((pBuffer->rdmaPage != NULL) && (pBuffer->rdmaMap != NULL))
 			{
+				NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap rdma unmap %d segments\n", 
+								  DMA_MSG_DEVICE, pBuffer->numSgs);
+				
 #ifdef AJA_IGPU
 				nvidia_p2p_dma_unmap_pages(pBuffer->rdmaMap);
 #else
@@ -3004,6 +3031,9 @@ static void dmaSgUnmap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 		}
 #endif
 
+		NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap unmap %d segments\n", 
+						  DMA_MSG_DEVICE, pBuffer->numSgs); 
+
 		// unmap the scatter list
 		dma_unmap_sg(&(pNTV2Params->pci_dev)->dev,
 					 pBuffer->pSgList,
@@ -3020,7 +3050,9 @@ static void dmaSgDevice(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
 
-	if ((pBuffer == NULL) || (pBuffer->pSgList == NULL))
+	if ((pBuffer == NULL) ||
+        (pBuffer->pSgList == NULL) ||
+        (pBuffer->rdma))
 		return;
 
 	if (pBuffer->sgMap)
@@ -3044,7 +3076,9 @@ static void dmaSgHost(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
 
-	if ((pBuffer == NULL) || (pBuffer->pSgList == NULL))
+	if ((pBuffer == NULL) ||
+        (pBuffer->pSgList == NULL) ||
+        (pBuffer->rdma))
 		return;
 
 	if (pBuffer->sgMap)
@@ -4542,64 +4576,66 @@ static bool dmaAudioSegmentInit(PDMA_CONTEXT pDmaContext, PDMA_AUDIO_SEGMENT pDm
 
 static bool dmaAudioSegmentConfig(PDMA_CONTEXT pDmaContext,
 								  PDMA_AUDIO_SEGMENT pDmaSegment,
-								  ULWord ringAddress,
+								  ULWord systemSize,
+								  ULWord transferSize,
+								  ULWord* pRingAddress,
 								  ULWord ringSize,
-								  ULWord audioOffset,
-								  ULWord audioSize)
+								  ULWord audioStart)
 {
+	ULWord i = 0;
 	if (pDmaSegment == NULL) return false;
-	if (audioOffset > ringSize)
+	if (audioStart > ringSize)
 	{
-		NTV2_MSG_AUDIO_SEGMENT("%s%d:%s%d:%s%d: dmaAudioSegmentConfig audioOffset(%08x) > ringSize(%08x)\n",
-							   DMA_MSG_CONTEXT, audioOffset, ringSize);
+		NTV2_MSG_AUDIO_SEGMENT("%s%d:%s%d:%s%d: dmaAudioSegmentConfig audioStart(%08x) > ringSize(%08x)\n",
+							   DMA_MSG_CONTEXT, audioStart, ringSize);
 		return false;
 	}
-	if (audioSize > ringSize)
+	
+	pDmaSegment->systemSize = systemSize;
+	pDmaSegment->transferSize = transferSize;
+	pDmaSegment->ringCount = 0;
+	for (i = 0; i < MAX_NUM_AUDIO_LINKS; i++)
 	{
-		NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaAudioSegmentConfig audioSize(%08x) > ringSize(%08x)\n",
-					   DMA_MSG_CONTEXT, audioSize, ringSize);
-		return false;
+		if (pRingAddress[i] == 0)
+			break;
+		pDmaSegment->ringAddress[i] = pRingAddress[i];
+		pDmaSegment->ringCount++;
 	}
 
-	pDmaSegment->ringAddress = ringAddress;
 	pDmaSegment->ringSize = ringSize;
-	pDmaSegment->audioOffset = audioOffset;
-	pDmaSegment->audioSize = audioSize;
-	pDmaSegment->transferAddress = 0;
-	pDmaSegment->transferSize = 0;
+	pDmaSegment->audioStart = audioStart;
+	pDmaSegment->audioSize = transferSize /  pDmaSegment->ringCount;
+	pDmaSegment->pageAddress = 0;
+	pDmaSegment->pageSize = 0;
+	pDmaSegment->ringIndex = 0;
 	pDmaSegment->systemOffset = 0;
-	pDmaSegment->transferOffset = 0;
+	pDmaSegment->pageOffset = 0;
+	pDmaSegment->audioOffset = 0;
 
-	NTV2_MSG_AUDIO_SEGMENT("%s%d:%s%d:%s%d: dmaAudioSegmentConfig ring address %08x  size %d  audio offset %08x  size %d\n", 
-						   DMA_MSG_CONTEXT, ringAddress, ringSize, audioOffset, audioSize);
+	NTV2_MSG_AUDIO_SEGMENT("%s%d:%s%d:%s%d: dmaAudioSegmentConfig ring address %08x  count %d size %d  audio offset %08x  size %d\n", 
+						   DMA_MSG_CONTEXT, pRingAddress[0], pDmaSegment->ringCount, pDmaSegment->ringSize = ringSize, pDmaSegment->audioStart, pDmaSegment->audioSize);
 	return true;
 }
 
 static inline bool dmaAudioSegmentTransfer(PDMA_CONTEXT pDmaContext,
 										   PDMA_AUDIO_SEGMENT pDmaSegment,
-										   ULWord64 transferAddress, 
-										   ULWord transferSize)
+										   ULWord64 pageAddress, 
+										   ULWord pageSize)
 {
 	if (pDmaSegment == NULL) return false;
-	if (transferSize >= pDmaSegment->ringSize) return false;
+	if (pageSize >= pDmaSegment->ringSize) return false;
 
 	// track system transfer offset
-	pDmaSegment->systemOffset += pDmaSegment->transferSize;
-	if (pDmaSegment->systemOffset >= pDmaSegment->audioSize) return false;
-
-	// limit transfer to system buffer size
-	if ((pDmaSegment->systemOffset + transferSize) > pDmaSegment->audioSize)
-	{
-		transferSize = pDmaSegment->audioSize - pDmaSegment->systemOffset;
-	}
+	pDmaSegment->systemOffset += pDmaSegment->pageSize;
+	if (pDmaSegment->systemOffset >= pDmaSegment->systemSize) return false;
 
 	// record new transfer info
-	pDmaSegment->transferAddress = transferAddress;
-	pDmaSegment->transferSize = transferSize;
-	pDmaSegment->transferOffset = 0;
+	pDmaSegment->pageAddress = pageAddress;
+	pDmaSegment->pageSize = pageSize;
+	pDmaSegment->pageOffset = 0;
 
 	NTV2_MSG_AUDIO_SEGMENT("%s%d:%s%d:%s%d: dmaAudioSegmentTransfer address %016llx  size %d\n",
-						   DMA_MSG_CONTEXT, transferAddress, transferSize);
+						   DMA_MSG_CONTEXT, pageAddress, pageSize);
 	return true;
 }
 
@@ -4620,38 +4656,58 @@ static inline bool dmaAudioSegmentDescriptor(PDMA_CONTEXT pDmaContext,
 		(pDescriptorSize == NULL)) return false;
 
 	// check for done with this transfer
-	if (pDmaSegment->transferOffset >= pDmaSegment->transferSize) 
+	if (pDmaSegment->pageOffset >= pDmaSegment->pageSize) 
 	{
 		NTV2_MSG_AUDIO_SEGMENT("%s%d:%s%d:%s%d: dmaAudioSegmentDescriptor segment complete\n",
 							   DMA_MSG_CONTEXT);
 		return false;
 	}
+	
+	// check for done with this ring
+	if (pDmaSegment->audioOffset >= pDmaSegment->audioSize)
+	{
+		NTV2_MSG_AUDIO_SEGMENT("%s%d:%s%d:%s%d: audio complete\n",
+							   DMA_MSG_CONTEXT);
+		pDmaSegment->ringIndex++;
+		if (pDmaSegment->ringIndex >= pDmaSegment->ringCount)
+			return false;
+		pDmaSegment->audioOffset = 0;
+	}
 
 	// compute system address for this descriptor
-	systemAddress = pDmaSegment->transferAddress + pDmaSegment->transferOffset;
+	systemAddress = pDmaSegment->pageAddress + pDmaSegment->pageOffset;
+	
 	// compute card offset into ring buffer
-	cardOffset = pDmaSegment->audioOffset + pDmaSegment->systemOffset + pDmaSegment->transferOffset;
+	cardOffset = pDmaSegment->audioStart + pDmaSegment->audioOffset;
+	
+	// compute descriptor size for transfer
+	descSize = pDmaSegment->pageSize - pDmaSegment->pageOffset;
+	
+	// limit descriptor size to transfer size for this ring
+	if ((pDmaSegment->audioOffset + descSize) > pDmaSegment->audioSize)
+		descSize = pDmaSegment->audioSize - pDmaSegment->audioOffset;
+		
 	// check for ring wrap
 	if (cardOffset >= pDmaSegment->ringSize)
 	{
-		cardAddress = pDmaSegment->ringAddress + (cardOffset - pDmaSegment->ringSize);
-		descSize = pDmaSegment->transferSize - pDmaSegment->transferOffset;
+		cardAddress = pDmaSegment->ringAddress[pDmaSegment->ringIndex] + (cardOffset - pDmaSegment->ringSize);
 	}
-	else if ((cardOffset + pDmaSegment->transferSize) >= pDmaSegment->ringSize)
+	else if ((cardOffset + descSize) >= pDmaSegment->ringSize)
 	{
-		cardAddress = pDmaSegment->ringAddress + cardOffset;
+		cardAddress = pDmaSegment->ringAddress[pDmaSegment->ringIndex] + cardOffset;
 		descSize = pDmaSegment->ringSize - cardOffset;
 	}
 	else
 	{
-		cardAddress = pDmaSegment->ringAddress + cardOffset;
-		descSize = pDmaSegment->transferSize - pDmaSegment->transferOffset;
+		cardAddress = pDmaSegment->ringAddress[pDmaSegment->ringIndex] + cardOffset;
 	}
+	
 	// this should not happen
 	if (descSize == 0) return false;
 
 	// increment the card offset
-	pDmaSegment->transferOffset += descSize;
+	pDmaSegment->pageOffset += descSize;
+	pDmaSegment->audioOffset += descSize;
 
 	// return a descriptor
 	*pSystemAddress = systemAddress;

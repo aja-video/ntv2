@@ -62,8 +62,23 @@ function(deploy_qt_libs target)
         endif()
 
         add_dependencies(${target}_macqtdeploy ${target})
-    elseif (LINUX)
-        message("lin_deploy_qt TODO")
-        return()
+    elseif (UNIX AND NOT APPLE)
+        message("lin_deploy_qt: ${target}")
+        set(LIB_RPATH "")
+        set(QT_LIBS_OPATH "")
+        set(QT_PLUGINS_OPATH "")
+        set(CREATE_QT_CONF "")
+        set(QT_CONF_PLUGINS_DIR "")
+
+        add_custom_target(${target}_ldd ALL
+            DEPENDS $<TARGET_FILE_DIR:${target}>
+            COMMAND ${CMAKE_COMMAND}
+                -DTARGET_NAME=${target}
+                -DSVG_SUPPORT=TRUE
+                -DQT_MAJOR_VERSION=5
+                -P ${CMAKE_MODULE_PATH}/linux_ldd_qt_libs.cmake
+            WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>
+            COMMENT "Run ldd ${target}"
+        )
     endif()
 endfunction()
