@@ -907,8 +907,10 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				if ((pAuto->frameStamp[nextFrame].validCount == 0) && !dropFrame)
 				{
 					// Advance to next frame for capture.
-					WriteRegister(deviceNumber, pAuto->activeFrameRegister,nextFrame, NO_MASK, NO_SHIFT);
+					WriteRegister(deviceNumber, pAuto->activeFrameRegister, nextFrame, NO_MASK, NO_SHIFT);
+					pAuto->nextFrame = nextFrame;
 
+					// Increment frames processed
 					pAuto->framesProcessed++;
 				}
 				else
@@ -1187,6 +1189,12 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				if (pAuto->circulateWithAudio)
 				{
 	                StopAudioCapture(deviceNumber, pAuto->audioSystem);
+					while (pAuto->audioSystemCount)
+					{
+						ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystemCount - 1)),
+											0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+						pAuto->audioSystemCount--;
+					}
 				}
 				if (pAuto->circulateWithCustomAncData)
 				{
@@ -1202,6 +1210,12 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				if (pAuto->circulateWithAudio)
 				{
 	                StopAudioPlayback(deviceNumber, pAuto->audioSystem);
+					while (pAuto->audioSystemCount)
+					{
+						ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystemCount - 1)),
+											0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+						pAuto->audioSystemCount--;
+					}
 				}
 				if (pAuto->circulateWithCustomAncData)
 				{
@@ -1245,16 +1259,16 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
     else if ((pAuto->state == NTV2_AUTOCIRCULATE_STARTING ||
 			  pAuto->state == NTV2_AUTOCIRCULATE_RUNNING) &&
 			 pAuto->circulateWithCustomAncData)
-    {
-        if (pAuto->recording)
-        {
-            SetAncExtField2WriteParams(&systemContext, acChannel, pAuto->nextFrame);
-        }
-        else
-        {
-            SetAncInsReadField2Params(&systemContext, acChannel, pAuto->nextFrame, pAuto->frameStamp[pAuto->nextFrame].ancField2TransferSize);
-        }
-    }
+	{
+		if (pAuto->recording)
+		{
+			SetAncExtField2WriteParams(&systemContext, acChannel, pAuto->nextFrame);
+		}
+		else
+		{
+			SetAncInsReadField2Params(&systemContext, acChannel, pAuto->nextFrame, pAuto->frameStamp[pAuto->nextFrame].ancField2TransferSize);
+		}
+	}
 }
 
 
@@ -1279,7 +1293,7 @@ AutoCirculateControl(ULWord deviceNumber, AUTOCIRCULATE_DATA *pACData)
 									   pACData->channelSpec,
 									   pACData->lVal1,
 									   pACData->lVal2,
-									   (NTV2AudioSystem)pACData->lVal3,
+									   (NTV2AudioSystem)(pACData->lVal3 & NTV2AudioSystemRemoveValues),
 									   pACData->lVal4,
 									   pACData->bVal1,
 									   pACData->bVal2,
@@ -1290,7 +1304,10 @@ AutoCirculateControl(ULWord deviceNumber, AUTOCIRCULATE_DATA *pACData)
 									   pACData->bVal7,
 									   pACData->bVal8,
 									   ((pACData->lVal6 & AUTOCIRCULATE_WITH_FIELDS) != 0),
-									   ((pACData->lVal6 & AUTOCIRCULATE_WITH_HDMIAUX) != 0));
+									   ((pACData->lVal6 & AUTOCIRCULATE_WITH_HDMIAUX) != 0),
+									   ((pACData->lVal3 & NTV2_AUDIOSYSTEM_Plus1) != 0),
+									   ((pACData->lVal3 & NTV2_AUDIOSYSTEM_Plus2) != 0),
+									   ((pACData->lVal3 & NTV2_AUDIOSYSTEM_Plus3) != 0));
 		break;
 
 	case eStartAutoCirc:
@@ -1871,6 +1888,7 @@ AutoCirculateTransfer(ULWord deviceNumber, AUTOCIRCULATE_TRANSFER_COMBO_STRUCT *
 		dmaParams.toHost = pAuto->recording;
 		dmaParams.dmaEngine = eVideoDmaEngine;
 		dmaParams.videoChannel = channel;
+		dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 		if (((pTransferStruct->transferFlags & kTransferFlagP2PPrepare) == kTransferFlagP2PPrepare) ||
 			((pTransferStruct->transferFlags & kTransferFlagP2PTarget) == kTransferFlagP2PTarget))
@@ -2142,6 +2160,7 @@ AutoCirculateTransfer(ULWord deviceNumber, AUTOCIRCULATE_TRANSFER_COMBO_STRUCT *
 			dmaParams.audioSystem = pAuto->audioSystem;
 			dmaParams.audNumBytes = pTransferStruct->audioBufferSize;
 			dmaParams.audOffset = pAuto->audioTransferOffset;
+			dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 			status = dmaTransfer(&dmaParams);
 			if (status != 0)
@@ -2493,6 +2512,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 					dmaParams.vidUserPitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentHostPitch;
 					dmaParams.vidFramePitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentDevicePitch;
 					dmaParams.numSegments = pTransferStruct->acInSegmentedDMAInfo.acNumSegments;
+					dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 					status = dmaTransfer(&dmaParams);
 					if (status != 0)
@@ -2565,6 +2585,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 			dmaParams.vidUserPitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentHostPitch;
 			dmaParams.vidFramePitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentDevicePitch;
 			dmaParams.numSegments = pTransferStruct->acInSegmentedDMAInfo.acNumSegments;
+			dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 			if (pAuto->circulateWithAudio &&
 				(pTransferStruct->acAudioBuffer.fUserSpacePtr != 0) &&
@@ -2676,6 +2697,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 			dmaParams.audioSystem = pAuto->audioSystem;
 			dmaParams.audNumBytes = pAuto->audioTransferSize;
 			dmaParams.audOffset = pAuto->audioTransferOffset;
+			dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 			status = dmaTransfer(&dmaParams);
 			if (status != 0)
@@ -2708,6 +2730,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 			dmaParams.ancF2Frame = frameNumber;
 			dmaParams.ancF2NumBytes = pAuto->ancField2TransferSize;
 			dmaParams.ancF2Offset = pAuto->ancField2TransferOffset;
+			dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 			status = dmaTransfer(&dmaParams);
 			if (status != 0)
@@ -3080,7 +3103,10 @@ OemAutoCirculateInit (ULWord deviceNumber,
 					  bool bWithCustomAncData,
 					  bool bWithLTC,
 					  bool bWithFields,
-					  bool bWithHDMIAux)
+					  bool bWithHDMIAux,
+					  bool bWithASPlus1,
+					  bool bWithASPlus2,
+					  bool bWithASPlus3)
 {
 	Ntv2SystemContext systemContext;
 	NTV2PrivateParams* pNTV2Params;
@@ -3165,6 +3191,7 @@ OemAutoCirculateInit (ULWord deviceNumber,
 		pAuto->circulateWithFields			= bWithFields;
 		pAuto->circulateWithHDMIAux			= (loopCount == 0) ? bWithHDMIAux : false;
 		pAuto->audioSystem  = audioSystem;
+		pAuto->audioSystemCount = 0;
 		pAuto->channelCount = (loopCount == 0) ? lChannelCount : 0;
 		pAuto->VBIRDTSC = 0;
 		pAuto->VBILastRDTSC = 0;
@@ -3250,6 +3277,22 @@ OemAutoCirculateInit (ULWord deviceNumber,
 
 		if (pAuto->circulateWithAudio)
 		{
+			pAuto->audioSystemCount++;
+			if (bWithASPlus1)
+			{
+				ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystem + 1)), 1, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+				pAuto->audioSystemCount++;
+				if (bWithASPlus2)
+				{
+					ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystem + 2)), 1, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+					pAuto->audioSystemCount++;
+				}
+				if (bWithASPlus3)
+				{
+					ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystem + 3)), 1, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+					pAuto->audioSystemCount++;
+				}
+			}
 			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec))
 			{
 				StopAudioCapture(deviceNumber, pAuto->audioSystem);
@@ -3565,6 +3608,12 @@ OemAutoCirculateAbort (ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				if (pAuto->circulateWithAudio)
 				{
 					StopAudioCapture(deviceNumber, pAuto->audioSystem);
+					while (pAuto->audioSystemCount)
+					{
+						ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystemCount - 1)),
+											0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+						pAuto->audioSystemCount--;
+					}
 				}
 
 				if (pAuto->circulateWithCustomAncData)
@@ -3577,6 +3626,12 @@ OemAutoCirculateAbort (ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				if (pAuto->circulateWithAudio)
 				{
 					StopAudioPlayback(deviceNumber, pAuto->audioSystem);
+					while (pAuto->audioSystemCount)
+					{
+						ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystemCount - 1)),
+											0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+						pAuto->audioSystemCount--;
+					}
 				}
 				else
 				{
@@ -5183,11 +5238,16 @@ oemAutoCirculateDmaAudioSetup(ULWord deviceNumber, INTERNAL_AUTOCIRCULATE_STRUCT
 
 		// save this for oemCompleteAutoCirculateTransfer
 		pAuto->audioTransferSize = ulPreWrapSize + ulPostWrapSize;
+        pAuto->audioTransferSize *= pAuto->audioSystemCount;
 		pAuto->audioStartSample = 0;
 	}
 	else
 	{
 		ULWord ulAudioBytes = pAuto->audioTransferSize;
+		if (pAuto->audioSystemCount > 1)
+		{
+			ulAudioBytes = ulAudioBytes/pAuto->audioSystemCount;
+		}
 
 		if(pAuto->audioDropsRequired > pAuto->audioDropsCompleted)
 		{
@@ -5933,6 +5993,9 @@ GetAudioSamplesPerFrame(ULWord deviceNumber, NTV2AudioSystem audioSystem, ULWord
 	{
 		switch (audioSystem)
 		{
+		case NTV2_AUDIOSYSTEM_Plus1:
+			case NTV2_AUDIOSYSTEM_Plus2:
+			case NTV2_AUDIOSYSTEM_Plus3:
 		case NTV2_NUM_AUDIOSYSTEMS:		// This is probably an error
 		case NTV2_AUDIOSYSTEM_1:
 			channel = NTV2_CHANNEL1;

@@ -1879,7 +1879,7 @@ static bool configure_hdmi_name(struct ntv2_hdmiout4 *ntv2_hout)
 		}
 	}
 
-	c_aux_data[index++] = 0x09; // PC General source
+	c_aux_data[index++] = 0x00; // Unknown source
 
 	write_aux_data(ntv2_hout, c_aux_spd_offset, index, c_aux_data, true);
 

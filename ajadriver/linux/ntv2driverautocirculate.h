@@ -155,6 +155,7 @@ typedef struct
 	ULWord					VBIAudioOut;
 	bool					startAudioNextFrame;
 	bool					stopAudioNextFrame;
+	ULWord					audioSystemCount;
 } INTERNAL_AUTOCIRCULATE_STRUCT;
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +198,10 @@ int OemAutoCirculateInit (	ULWord boardNumber,
 							bool bWithCustomAncData,
 							bool bWithLTC,
 							bool bWithFields,
-							bool bWithHDMIAux
+							bool bWithHDMIAux,
+							bool bWithASPlus1,
+							bool bWithASPlus2,
+							bool bWithASPlus3
 							);
 
 ULWord GetAudioFrameBufferNumber(ULWord boardNumber, ULWord boardID, NTV2AudioSystem audioSystem);
