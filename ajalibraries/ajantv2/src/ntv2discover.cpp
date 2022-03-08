@@ -82,9 +82,11 @@ extractBoardInventory(NTV2NubPkt *pPkt, NTV2DiscoverRespPayload *boardInventory,
 		dbi->boardID = ntohl(dbi->boardID);
 		char tmp[NTV2_DISCOVER_BOARDINFO_DESC_STRMAX];
 		// Prepend peername to description.
-		strncpy(tmp, dbi->description, NTV2_DISCOVER_BOARDINFO_DESC_STRMAX);
 
-		int peernameLen = snprintf( dbi->description, 
+		strncpy(tmp, dbi->description, NTV2_DISCOVER_BOARDINFO_DESC_STRMAX - 1);		
+		tmp[sizeof tmp - 1] = '\0';
+
+		int peernameLen = snprintf(	dbi->description, 
 									NTV2_DISCOVER_BOARDINFO_DESC_STRMAX, 
 									"%s: ", peername);
 
