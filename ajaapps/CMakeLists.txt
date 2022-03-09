@@ -16,18 +16,25 @@ if (AJA_BUILD_APPS)
     add_subdirectory(crossplatform/demoapps/ntv2player4k)
     add_subdirectory(crossplatform/demoapps/ntv2player8k)
     add_subdirectory(crossplatform/demoapps/ntv2switchbitfile)
-    add_subdirectory(crossplatform/ntv2firmwareinstaller)
+
+    # nvidia demos
+    add_subdirectory(crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
+    add_subdirectory(crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
 
     # tools
     add_subdirectory(crossplatform/logjammer)
     add_subdirectory(crossplatform/logreader)
+    add_subdirectory(crossplatform/ntv2firmwareinstaller)
     add_subdirectory(crossplatform/ntv2thermo)
     add_subdirectory(crossplatform/pciwhacker)
+    add_subdirectory(crossplatform/rdmawhacker)
     add_subdirectory(crossplatform/regio)
+    add_subdirectory(crossplatform/supportlog)
     add_subdirectory(crossplatform/testaux)
     add_subdirectory(crossplatform/testcrc)
     add_subdirectory(crossplatform/testframe)
     add_subdirectory(crossplatform/testp2p)
+    add_subdirectory(crossplatform/testrdma)
     add_subdirectory(crossplatform/vpidtool)
 
     if (NOT AJA_BUILD_OPENSOURCE)
