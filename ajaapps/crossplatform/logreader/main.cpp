@@ -2,7 +2,7 @@
 /**
 	@file		crossplatform/logreader/main.cpp
 	@brief		Implements 'logreader' command.
-	@copyright	(C) 2016-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2016-2022 AJA Video Systems, Inc.
 **/
 #include "ajantv2/includes/ntv2publicinterface.h"
 #include "ajabase/common/common.h"

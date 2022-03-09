@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: MIT
- * Copyright (C) 2004 - 2021 AJA Video Systems, Inc.
+ * Copyright (C) 2004 - 2022 AJA Video Systems, Inc.
  */
 /////////////////////////////////////////////////////////////////////////////
 // NTV2 Linux v2.6 Device Driver for AJA OEM devices.

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: MIT
- * Copyright (C) 2004 - 2021 AJA Video Systems, Inc.
+ * Copyright (C) 2004 - 2022 AJA Video Systems, Inc.
  */
 // Backported from 2.6 kernel so we can do wait_event_interruptible_timeout().
 

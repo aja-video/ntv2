@@ -1,7 +1,7 @@
 /**
 	@file		crossplatform/vpidtool/main.cpp
 	@brief		Command-line tool that converts a 32-bit VPID value to a human-readable string.
-	@copyright	(C) 2019-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2019-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

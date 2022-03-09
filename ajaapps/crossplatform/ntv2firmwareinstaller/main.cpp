@@ -2,7 +2,7 @@
 /**
 	@file		ntv2firmwareinstaller/main.cpp
 	@brief		Implements 'ntv2firmwareinstaller' command.
-	@copyright	(C) 2014-2021 AJA Video Systems, Inc.	All rights reserved worldwide.
+	@copyright	(C) 2014-2022 AJA Video Systems, Inc.	All rights reserved worldwide.
 **/
 #include "ajatypes.h"
 #include "ntv2enums.h"

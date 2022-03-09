@@ -75,15 +75,6 @@ set(AJADRIVER_COMMON_SOURCES
 set(AJADRIVER_LINUX_HEADERS
     linux/driverdbg.h
     linux/fs1wait.h
-    linux/hevccommand.h
-    linux/hevccommon.h
-    linux/hevcconstants.h
-    linux/hevcdriver.h
-    linux/hevcinterrupt.h
-    linux/hevcparams.h
-    linux/hevcpublic.h
-    linux/hevcregister.h
-    linux/hevcstream.h
     linux/ntv2dma.h
     linux/ntv2driverautocirculate.h
     linux/ntv2driverbigphysarea.h
@@ -95,13 +86,6 @@ set(AJADRIVER_LINUX_HEADERS
     linux/ntv2serial.h
     linux/registerio.h)
 set(AJADRIVER_LINUX_SOURCES
-    linux/hevcapi.c
-    linux/hevccommand.c
-    linux/hevcdriver.c
-    linux/hevcinterrupt.c
-    linux/hevcparams.c
-    linux/hevcregister.c
-    linux/hevcstream.c
     linux/ntv2dma.c
     linux/ntv2driverautocirculate.c
     linux/ntv2driver.c
@@ -111,6 +95,30 @@ set(AJADRIVER_LINUX_SOURCES
     linux/ntv2kona2.c
     linux/ntv2serial.c
     linux/registerio.c)
+if (NOT AJA_BUILD_OPENSOURCE)
+    # add HEVC sources
+    set(AJADRIVER_LINUX_HEADERS
+        ${AJADRIVER_LINUX_HEADERS}
+        linux/hevccommand.h
+        linux/hevccommon.h
+        linux/hevcconstants.h
+        linux/hevcdriver.h
+        linux/hevcinterrupt.h
+        linux/hevcparams.h
+        linux/hevcpublic.h
+        linux/hevcregister.h
+        linux/hevcstream.h)
+    set(AJADRIVER_LINUX_SOURCES
+        ${AJADRIVER_LINUX_SOURCES}
+        linux/hevcapi.c
+        linux/hevccommand.c
+        linux/hevcdriver.c
+        linux/hevcinterrupt.c
+        linux/hevcparams.c
+        linux/hevcregister.c
+        linux/hevcstream.c)
+endif()
+
 set(AJADRIVER_LINUX_BUILD_FILES
     linux/Makefile
     linux/nvidia-ko-to-module-symvers)
