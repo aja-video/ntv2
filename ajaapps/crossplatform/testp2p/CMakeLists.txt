@@ -28,7 +28,7 @@ target_include_directories(testp2p PUBLIC ${TESTP2P_TARGET_INCLUDE_DIRS})
 target_link_libraries(testp2p PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${TESTP2P_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/testp2p)
+	install(FILES ${TESTP2P_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/testp2p)
 endif()
 
 install(TARGETS testp2p

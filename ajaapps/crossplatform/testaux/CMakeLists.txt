@@ -28,7 +28,7 @@ target_include_directories(testaux PUBLIC ${TESTAUX_TARGET_INCLUDE_DIRS})
 target_link_libraries(testaux PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${TESTAUX_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/testaux)
+	install(FILES ${TESTAUX_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/testaux)
 endif()
 
 install(TARGETS testaux

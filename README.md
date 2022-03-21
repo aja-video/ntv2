@@ -108,7 +108,7 @@ These instructions assume that you have:
 
 The `cmake --install` command can be used to deploy NTV2 sources and build artifacts to default system install  
 directories or to variable paths, specified by the following variables:
-- `AJA_INSTALL_INCLUDEDIR` - Destination for deploying NTV2 sources/headers
+- `AJA_INSTALL_DIR` - Destination for deploying NTV2 sources/headers
 - `AJA_INSTALL_LIBDIR` - Destination for deploying built static/shared libs
 - `AJA_INSTALL_BINDIR` - Destination for deploying built executables
 - `AJA_INSTALL_FRAMEWORKDIR` - Destination for deploying built macOS Frameworks
@@ -131,7 +131,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug -GNinja \
 -DAJA_INSTALL_LIBDIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}/lib" \
 -DAJA_INSTALL_BINDIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}/bin" \
 -DAJA_INSTALL_FRAMEWORKDIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}/lib" \
--DAJA_INSTALL_INCLUDEDIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}" \
+-DAJA_INSTALL_DIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}" \
 -DAJA_DEPLOY_LIBS=ON -DAJA_QT_DIR=${QT_DIR} \
 -DAJA_BUILD_OPENSOURCE=ON .. && \
 ninja -f build.ninja && \

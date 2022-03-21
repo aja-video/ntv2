@@ -39,7 +39,7 @@ set(RDMAWHACKER_TARGET_SOURCES
 # target_link_libraries(rdmawhacker PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${RDMAWHACKER_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/rdmawhacker)
+	install(FILES ${RDMAWHACKER_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/rdmawhacker)
 endif()
 
 # install(TARGETS rdmawhacker

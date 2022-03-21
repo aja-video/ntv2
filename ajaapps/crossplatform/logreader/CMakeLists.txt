@@ -27,7 +27,7 @@ target_include_directories(logreader PUBLIC ${LOGREADER_TARGET_INCLUDE_DIRS})
 target_link_libraries(logreader PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${LOGREADER_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/logreader)
+	install(FILES ${LOGREADER_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/logreader)
 endif()
 
 install(TARGETS logreader

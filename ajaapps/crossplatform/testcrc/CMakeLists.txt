@@ -28,7 +28,7 @@ target_include_directories(testcrc PUBLIC ${TESTCRC_TARGET_INCLUDE_DIRS})
 target_link_libraries(testcrc PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${TESTCRC_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/testcrc)
+	install(FILES ${TESTCRC_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/testcrc)
 endif()
 
 install(TARGETS testcrc

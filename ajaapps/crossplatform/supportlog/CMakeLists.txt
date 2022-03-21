@@ -28,8 +28,8 @@ target_include_directories(supportlog PUBLIC ${SUPPORTLOG_TARGET_INCLUDE_DIRS})
 target_link_libraries(supportlog PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${SUPPORTLOG_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/supportlog)
-	install(FILES ${SUPPORTLOG_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/supportlog)
+	install(FILES ${SUPPORTLOG_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/supportlog)
+	install(FILES ${SUPPORTLOG_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/supportlog)
 endif()
 
 install(TARGETS supportlog

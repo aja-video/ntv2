@@ -28,7 +28,7 @@ target_include_directories(testframe PUBLIC ${TESTFRAME_TARGET_INCLUDE_DIRS})
 target_link_libraries(testframe PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${TESTFRAME_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/testframe)
+	install(FILES ${TESTFRAME_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/testframe)
 endif()
 
 install(TARGETS testframe

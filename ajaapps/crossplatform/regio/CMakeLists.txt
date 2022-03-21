@@ -32,8 +32,8 @@ target_include_directories(regio PUBLIC ${REGIO_TARGET_INCLUDE_DIRS})
 target_link_libraries(regio PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${REGIO_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/regio)
-	install(FILES ${REGIO_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/regio)
+	install(FILES ${REGIO_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/regio)
+	install(FILES ${REGIO_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/regio)
 endif()
 
 install(TARGETS regio

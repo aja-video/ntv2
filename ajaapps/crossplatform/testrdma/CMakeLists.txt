@@ -28,7 +28,7 @@ set(TESTRDMA_TARGET_SOURCES
 # target_link_libraries(testrdma PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${TESTRDMA_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/testrdma)
+	install(FILES ${TESTRDMA_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/testrdma)
 endif()
 
 # install(TARGETS testrdma
