@@ -78,8 +78,8 @@ set(CUDALOWLATENCYDEMO_TARGET_SOURCES
 # target_link_libraries(cudalowlatencydemo PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${CUDALOWLATENCYDEMO_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
-	install(FILES ${CUDALOWLATENCYDEMO_BUILD_FILES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
-	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/NVIDIA/common)
-	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
+	install(FILES ${CUDALOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
+	install(FILES ${CUDALOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
+	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/common)
+	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 endif()

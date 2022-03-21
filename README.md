@@ -106,16 +106,13 @@ These instructions assume that you have:
 
 ## Deploying NTV2 sources and build artifacts with CMake Install
 
-The `cmake --install` command can be used to deploy NTV2 sources and build artifacts to default system install  
-directories or to variable paths, specified by the following variables:
-- `AJA_INSTALL_DIR` - Destination for deploying NTV2 sources/headers
-- `AJA_INSTALL_LIBDIR` - Destination for deploying built static/shared libs
-- `AJA_INSTALL_BINDIR` - Destination for deploying built executables
-- `AJA_INSTALL_FRAMEWORKDIR` - Destination for deploying built macOS Frameworks
+The `cmake --install` command can be used to deploy NTV2 sources and build artifacts to a destination path
 
-If these variables are not overridden at CMake build time, the default CMake install paths will be used.
+specified with the `CMAKE_INSTALL_PREFIX` variable. If this variable is not overridden at CMake build time,
 
-See `cmake/CommonVars.cmake` for more info.
+the default system install paths will be used (`/usr/local` on UNIX and `c:/Program Files/${PROJECT_NAME}` on Windows).
+
+See https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html for more information.
 
 ### Linux example
 ```
@@ -128,10 +125,7 @@ rm -rf ${NTV2_INSTALL_DIR} && \
 rm -rf ninja && mkdir ninja && pushd ninja && \
 cmake -DCMAKE_BUILD_TYPE=Debug -GNinja \
 -DAJA_INSTALL_HEADERS=ON -DAJA_INSTALL_SOURCES=ON \
--DAJA_INSTALL_LIBDIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}/lib" \
--DAJA_INSTALL_BINDIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}/bin" \
--DAJA_INSTALL_FRAMEWORKDIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}/lib" \
--DAJA_INSTALL_DIR="${NTV2_DIR}/${NTV2_INSTALL_DIR}" \
+-DCMAKE_INSTALL_PREFIX="${NTV2_DIR}/${NTV2_INSTALL_DIR}" \
 -DAJA_DEPLOY_LIBS=ON -DAJA_QT_DIR=${QT_DIR} \
 -DAJA_BUILD_OPENSOURCE=ON .. && \
 ninja -f build.ninja && \
