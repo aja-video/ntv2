@@ -54,6 +54,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
+message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 # Optional build artifacts output directory
 if (AJA_DEPLOY_OUTPUTS)
