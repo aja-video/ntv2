@@ -55,12 +55,6 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-message(STATUS "cmake install destinations (when running cmake --install):\n\
-    AJA_INSTALL_PREFIX = ${AJA_INSTALL_PREFIX}\n\
-    AJA_INSTALL_INCLUDEDIR = ${AJA_INSTALL_INCLUDEDIR}\n\
-    AJA_INSTALL_LIBDIR = ${AJA_INSTALL_LIBDIR}\n\
-    AJA_INSTALL_BINDIR = ${AJA_INSTALL_BINDIR}")
-
 # Optional build artifacts output directory
 if (AJA_DEPLOY_OUTPUTS)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY

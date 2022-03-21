@@ -43,11 +43,11 @@ target_include_directories(ntv2firmwareinstaller PUBLIC ${NTV2FIRMWAREINSTALLER_
 target_link_libraries(ntv2firmwareinstaller PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${AJA_NTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/utilityfiles/public)
-	install(FILES ${NTV2FIRMWAREINSTALLER_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/ntv2firmwareinstaller)
-	install(FILES ${NTV2FIRMWAREINSTALLER_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/ntv2firmwareinstaller)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${AJA_NTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajalibraries/ajantv2/utilityfiles/public)
+	install(FILES ${NTV2FIRMWAREINSTALLER_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/ntv2firmwareinstaller)
+	install(FILES ${NTV2FIRMWAREINSTALLER_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/ntv2firmwareinstaller)
 endif()
 
 install(TARGETS ntv2firmwareinstaller

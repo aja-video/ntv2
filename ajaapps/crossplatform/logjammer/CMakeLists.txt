@@ -27,7 +27,7 @@ target_include_directories(logjammer PUBLIC ${LOGJAMMER_TARGET_INCLUDE_DIRS})
 target_link_libraries(logjammer PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${LOGJAMMER_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/logjammer)
+	install(FILES ${LOGJAMMER_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/logjammer)
 endif()
 
 install(TARGETS logjammer

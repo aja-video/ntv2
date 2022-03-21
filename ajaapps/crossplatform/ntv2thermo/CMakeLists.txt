@@ -27,7 +27,7 @@ target_include_directories(ntv2thermo PUBLIC ${NTV2THERMO_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2thermo PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${NTV2THERMO_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/ntv2thermo)
+	install(FILES ${NTV2THERMO_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/ntv2thermo)
 endif()
 
 install(TARGETS ntv2thermo

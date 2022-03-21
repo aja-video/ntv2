@@ -27,7 +27,7 @@ target_include_directories(vpidtool PUBLIC ${VPIDTOOL_TARGET_INCLUDE_DIRS})
 target_link_libraries(vpidtool PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${VPIDTOOL_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/vpidtool)
+	install(FILES ${VPIDTOOL_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/vpidtool)
 endif()
 
 install(TARGETS vpidtool

@@ -38,9 +38,9 @@ target_include_directories(pciwhacker PUBLIC ${PCIWHACKER_TARGET_INCLUDE_DIRS})
 target_link_libraries(pciwhacker PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${PCIWHACKER_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/pciwhacker)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${PCIWHACKER_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/pciwhacker)
 endif()
 
 install(TARGETS pciwhacker
