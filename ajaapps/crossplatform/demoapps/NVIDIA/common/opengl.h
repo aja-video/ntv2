@@ -8,10 +8,8 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #else
-#include <gl/glew.h>
-//#include <glut.h>
-//#include <glu.h>
-#include <gl/gl.h>
+#include <GL/glew.h>
+#include <GL/gl.h>
 #endif
 
 
