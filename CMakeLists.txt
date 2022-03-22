@@ -2,14 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 
 project(ntv2)
 
-# CMake includes
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+# AJA Includes
 include(AJAHelpers)
 include(BuildOptions)
 include(CommonDefines)
 include(CommonFlags)
 include(CommonPaths)
 include(CommonVars)
+# CMake includes
+include(GNUInstallDirs)
 
 # Override the following variables to set the NTV2 SDK version defines and strings used for the SDK and apps
 if (AJA_BUILDING_CMAKE)
@@ -54,6 +56,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
+
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 # Optional build artifacts output directory

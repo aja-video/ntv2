@@ -1,7 +1,5 @@
 project(ajadriver)
 
-message ("added ajadriver")
-
 # AJA does not yet provide sources for the Mac and Windows drivers under the MIT license.
 # Place this text as a README.md file in the ajadriver/mac and ajadriver/win directories as a placeholder.
 set(WIN_MAC_MIT_DRIVER_README 
@@ -160,8 +158,12 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJADRIVER_LINUX_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajadriver/linux)
     install(FILES ${AJADRIVER_LINUX_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajadriver/linux)
     install(FILES ${AJADRIVER_LINUX_LOAD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/bin)
-    install(FILES ${AJA_CMAKE_DIR}/../build/sdkversion.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/common.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
     install(FILES ${AJA_CMAKE_DIR}/../build/configure.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/internal.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/qt.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/sdkversion.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/targets.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
 endif()
 # common
 if (AJA_INSTALL_HEADERS)
@@ -172,3 +174,5 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJADRIVER_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajadriver)
     install(FILES ${AJA_LIB_NTV2_ROOT}/src/ntv2driverprocamp.cpp DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src)
 endif()
+
+message ("added ajadriver")

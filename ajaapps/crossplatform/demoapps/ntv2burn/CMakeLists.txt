@@ -2,7 +2,7 @@ project(ntv2burn)
 
 message("added ntv2burn")
 
-set(NTV2BURN_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -24,21 +24,21 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2BURN_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2BURN_SOURCES}
 	${NTV2BURN_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2burn ${NTV2BURN_TARGET_SOURCES})
+add_executable(ntv2burn ${TARGET_SOURCES})
 add_dependencies(ntv2burn ajantv2)
-target_include_directories(ntv2burn PUBLIC ${NTV2BURN_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2burn PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_include_directories(ntv2burn PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(ntv2burn PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)

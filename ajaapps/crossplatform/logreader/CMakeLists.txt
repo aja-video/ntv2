@@ -13,9 +13,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(LOGREADER_TARGET_SOURCES
@@ -24,7 +24,7 @@ set(LOGREADER_TARGET_SOURCES
 add_executable(logreader ${LOGREADER_TARGET_SOURCES})
 add_dependencies(logreader ajantv2)
 target_include_directories(logreader PUBLIC ${LOGREADER_TARGET_INCLUDE_DIRS})
-target_link_libraries(logreader PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_link_libraries(logreader PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${LOGREADER_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/logreader)
