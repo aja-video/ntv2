@@ -42,8 +42,8 @@ if (AJA_BUILD_APPS)
         add_subdirectory(crossplatform/ajadaemon)
         add_subdirectory(crossplatform/controlpanel)
         add_subdirectory(crossplatform/controlroom)
-		if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-			# only on Linux for now
+		if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND AJA_BUILD_NONAJA)
+			# ndibridge is currently Linux-only, and requires building libsamplerate
 			add_subdirectory(crossplatform/ndibridge)
 		endif()
 

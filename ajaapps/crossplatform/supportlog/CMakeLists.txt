@@ -14,9 +14,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(SUPPORTLOG_TARGET_SOURCES
@@ -25,7 +25,7 @@ set(SUPPORTLOG_TARGET_SOURCES
 add_executable(supportlog ${SUPPORTLOG_TARGET_SOURCES})
 add_dependencies(supportlog ajantv2)
 target_include_directories(supportlog PUBLIC ${SUPPORTLOG_TARGET_INCLUDE_DIRS})
-target_link_libraries(supportlog PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_link_libraries(supportlog PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${SUPPORTLOG_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)

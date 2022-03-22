@@ -5,3 +5,8 @@ function(add_subdirectory_if_valid target)
 		add_subdirectory(${target})
 	endif()
 endfunction()
+
+function(post_build_copy_file target src dst)
+	add_custom_command(TARGET ${target} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst})
+endfunction()

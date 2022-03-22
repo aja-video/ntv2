@@ -2,7 +2,7 @@
 # get absolute path to qmake, then use it to find windeployqt executable
 function(deploy_qt_libs target)
     if (WIN32)
-        find_package(Qt5Core REQUIRED)
+        find_package(Qt5Core HINTS ${AJA_QT_DIR} REQUIRED)
         get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
         get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
@@ -36,7 +36,7 @@ function(deploy_qt_libs target)
             )
         endif()
     elseif (APPLE)
-        find_package(Qt5Core REQUIRED)
+        find_package(Qt5Core HINTS ${AJA_QT_DIR} REQUIRED)
         get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
         get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 

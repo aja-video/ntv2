@@ -47,7 +47,7 @@ if (AJA_BUILD_OPENSOURCE)
     option(AJA_DEPLOY_LIBS "Deploy dependency libraries (DLL/dylib) into the .exe output directory (Win32) or .app bundle (macOS)." OFF)
 
     option(AJA_BUILD_APPS "Build AJA NTV2 applications" ON)
-    option(AJA_BUILD_DRIVER "Build AJA NTV2 driver" OFF)
+    option(AJA_BUILD_DRIVER "Build AJA NTV2 driver" ON)
     option(AJA_BUILD_LIBS "Build AJA libraries" ON)
     option(AJA_BUILD_PLUGINS "Build AJA Plug-ins" OFF)
     option(AJA_BUILD_TESTS "Build unit tests" OFF)
