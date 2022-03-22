@@ -41,6 +41,10 @@ else
 endif
 endif
 
+ifdef AJA_CREATE_DEVICE_NODES
+	EXTRA_CFLAGS += -DAJA_CREATE_DEVICE_NODES=$(AJA_CREATE_DEVICE_NODES)
+endif
+
 DRIVERSRCS = ntv2devicefeatures.c \
 			ntv2driver.c \
 			ntv2driverautocirculate.c \

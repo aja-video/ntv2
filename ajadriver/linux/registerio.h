@@ -97,6 +97,7 @@ typedef struct ntv2_module_private
 	char *	name;
 	char *	driverName;
 	ULWord	intrBitLut[eNumInterruptTypes];
+	struct class *class;
 
 	// uart driver
 	struct uart_driver 			*uart_driver;
@@ -240,6 +241,7 @@ typedef struct ntv2_private
 	ULWord busNumber;
 	ULWord pci_device;
 	char name[16];
+	struct cdev cdev;
 
 	// Base Address Values
 	unsigned long _unmappedBAR0Address;
