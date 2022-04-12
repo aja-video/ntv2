@@ -1,5 +1,7 @@
 project(ajadriver)
 
+include(AJAHelpers)
+
 # AJA does not yet provide sources for the Mac and Windows drivers under the MIT license.
 # Place this text as a README.md file in the ajadriver/mac and ajadriver/win directories as a placeholder.
 set(WIN_MAC_MIT_DRIVER_README 
@@ -129,9 +131,9 @@ set(AJADRIVER_TARGET_SOURCES
     ${AJADRIVER_COMMON_SOURCES})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    message("Windows driver CMake build not yet implemented!")
+    aja_message(STATUS "Windows driver CMake build not yet implemented!")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    message("macOS driver CMake build not yet implemented!")
+    aja_message(STATUS "macOS driver CMake build not yet implemented!")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(AJADRIVER_TARGET_SOURCES
         ${AJADRIVER_TARGET_SOURCES}
@@ -174,5 +176,3 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJADRIVER_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajadriver)
     install(FILES ${AJA_LIB_NTV2_ROOT}/src/ntv2driverprocamp.cpp DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src)
 endif()
-
-message ("added ajadriver")

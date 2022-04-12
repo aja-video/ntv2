@@ -8,6 +8,7 @@ set(AJA_PLUGINS_ROOT ${AJA_CMAKE_DIR}/../ajaplugins)
 set(AJA_QA_ROOT ${AJA_CMAKE_DIR}/../qa)
 set(NON_AJA_ROOT ${AJA_CMAKE_DIR}/../non-aja)
 set(AJA_DEMO_COMMON_ROOT ${AJA_APPS_ROOT}/crossplatform/demoapps)
+set(AJA_CI_ROOT ${AJA_CMAKE_DIR}/../CI)
 
 set(AJA_LIB_ANC_ROOT ${AJA_LIBRARIES_ROOT}/ajaanc)
 set(AJA_LIB_BASE_ROOT ${AJA_LIBRARIES_ROOT}/ajabase)

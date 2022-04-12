@@ -42,7 +42,7 @@ function(deploy_qt_libs target)
 
         get_target_property(_is_target_bundle ${target} MACOSX_BUNDLE)
         if (_is_target_bundle)
-            message("macOS bundle: ${target}")
+            aja_message(STATUS "macOS bundle: ${target}")
             add_custom_target(
                 ${target}_macqtdeploy ALL
                 DEPENDS $<TARGET_BUNDLE_DIR:${target}>
@@ -51,7 +51,7 @@ function(deploy_qt_libs target)
                 VERBATIM
             )
         else()
-            message("macOS binary: ${target}")
+            aja_message(STATUS "macOS binary: ${target}")
             add_custom_target(
                 ${target}_macqtdeploy ALL
                 DEPENDS $<TARGET_FILE_DIR:${target}>
@@ -63,7 +63,7 @@ function(deploy_qt_libs target)
 
         add_dependencies(${target}_macqtdeploy ${target})
     elseif (UNIX AND NOT APPLE)
-        message("lin_deploy_qt: ${target}")
+        aja_message(STATUS "lin_deploy_qt: ${target}")
         set(LIB_RPATH "")
         set(QT_LIBS_OPATH "")
         set(QT_PLUGINS_OPATH "")

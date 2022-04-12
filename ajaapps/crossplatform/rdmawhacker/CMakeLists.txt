@@ -1,6 +1,5 @@
 project(rdmawhacker)
 
-message("added rdmawhacker")
 
 set(DEMO_APPS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../demoapps)
 
