@@ -41,6 +41,7 @@ option(AJA_INSTALL_HEADERS "Deploy headers into build output directory?" ON)
 option(AJA_NTV2_SDK_GEN "Run the ajantv2 `sdkgen` script before building (not available in NTV2 open-source)?" OFF)
 option(AJA_USE_CLANG "Build NTV2 SDK with LLVM Clang compiler?" OFF)
 option(AJA_USE_GCC_NEW_ABI "Build NTV2 SDK with GCC 5 or later?" OFF) # for AJA internal CI builds only
+option(AJA_BUILDING_CMAKE "Set to ON if building the NTV2 repo with CMake" OFF)
 
 if (AJA_BUILD_OPENSOURCE)
     aja_message(STATUS "Building open-source AJA NTV2 SDK (MIT license)")
