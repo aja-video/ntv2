@@ -1,5 +1,3 @@
-include(AJAHelpers)
-
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	aja_message(STATUS "skipping dvplowlatencydemo (requires Linux)")
 	return()
@@ -86,5 +84,9 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${DVPLOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
 	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/common)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/dvplowlatencydemo)
 endif()
 
+if (AJA_CODE_SIGN)
+    aja_code_sign(dvplowlatencydemo)
+endif()

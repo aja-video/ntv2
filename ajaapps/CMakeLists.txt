@@ -1,4 +1,3 @@
-include(AJAHelpers)
 # aja apps
 if (AJA_BUILD_APPS)
     # aja core demos
@@ -19,8 +18,8 @@ if (AJA_BUILD_APPS)
     aja_add_subdirectory(crossplatform/demoapps/ntv2switchbitfile)
 
     # nvidia demos
-    # aja_add_subdirectory(crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
-    # aja_add_subdirectory(crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
+    aja_add_subdirectory(crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
+    # aja_add_subdirectory(crossplatform/demoapps/NVIDIA/dvplowlatencydemo) # TODO(paulh): Need to audit dependencies for open-source distribution.
 
     # tools
     aja_add_subdirectory(crossplatform/logjammer)
