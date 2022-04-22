@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 //
-// Copyright (C) 2012 AJA Video Systems, Inc.
-// Proprietary and Confidential information.
+// Copyright (C) 2012-2022 AJA Video Systems, Inc.
 //
 #ifndef NTV2GPUCIRCULARBUFFER_H
 #define NTV2GPUCIRCULARBUFFER_H

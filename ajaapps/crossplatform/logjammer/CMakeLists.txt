@@ -1,6 +1,5 @@
 project(logjammer)
 
-
 set(LOGJAMMER_TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIBRARIES_ROOT}
@@ -27,6 +26,7 @@ target_link_libraries(logjammer PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${LOGJAMMER_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/logjammer)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/logjammer)
 endif()
 
 install(TARGETS logjammer
@@ -35,3 +35,7 @@ install(TARGETS logjammer
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(logjammer)
+endif()

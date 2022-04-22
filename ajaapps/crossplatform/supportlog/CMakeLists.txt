@@ -1,6 +1,5 @@
 project(supportlog)
 
-
 set(SUPPORTLOG_TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIBRARIES_ROOT}
@@ -29,6 +28,7 @@ target_link_libraries(supportlog PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${SUPPORTLOG_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
 	install(FILES ${SUPPORTLOG_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
 endif()
 
 install(TARGETS supportlog
@@ -37,3 +37,7 @@ install(TARGETS supportlog
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(supportlog)
+endif()

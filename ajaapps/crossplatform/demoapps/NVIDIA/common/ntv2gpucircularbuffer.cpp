@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 //
-// Copyright (C) 2012 AJA Video Systems, Inc.
-// Proprietary and Confidential information.
+// Copyright (C) 2012-2022 AJA Video Systems, Inc.
 //
 #include "ntv2gpucircularbuffer.h"
 #include "ajabase/common/circularbuffer.h"

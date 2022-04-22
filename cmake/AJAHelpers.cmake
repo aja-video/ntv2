@@ -1,6 +1,19 @@
+if(NOT DEFINED Python2_EXECUTABLE)
+    find_package(Python2 QUIET)
+endif()
+if(NOT DEFINED Python3_EXECUTABLE)
+    find_package(Python3 QUIET)
+endif()
+if(NOT DEFINED GIT_EXECUTABLE)
+	find_package(Git QUIET)
+endif()
 function(aja_message mode msg)
 	message(${mode} "AJA:  ${msg}" ${ARGN})
 endfunction(aja_message)
+
+aja_message(STATUS "Python 2 Executable: ${Python2_EXECUTABLE}")
+aja_message(STATUS "Python 3 Executable: ${Python3_EXECUTABLE}")
+aja_message(STATUS "Git Executable: ${GIT_EXECUTABLE}")
 
 # wrapper around add_subdirectory that only adds the directory
 # if the target exists and contains a CMakeLists.txt file
@@ -84,17 +97,6 @@ function(aja_code_sign targets)
 		return()
 	endif()
 
-	if (WIN32)
-		execute_process(COMMAND where python OUTPUT_VARIABLE python3_exe)
-	elseif(APPLE)
-		execute_process(COMMAND which python3 OUTPUT_VARIABLE python3_exe)
-	endif()
-	file(TO_CMAKE_PATH "${python3_exe}" python3_exe)
-	string(REPLACE "\n" "" python3_exe ${python3_exe})
-	if (NOT EXISTS ${python3_exe})
-		aja_message(STATUS "Python 3 (${python3_exe}) not found! Code signing scripts not available.")
-		return()
-	endif()
 	foreach(target IN LISTS targets)
 		if (EXISTS "${AJA_NTV2_ROOT}/installers/pythonlib/aja/tools/sign.py")
 			set(pythonlib_path ${AJA_NTV2_ROOT}/installers/pythonlib)
@@ -105,10 +107,20 @@ function(aja_code_sign targets)
 			add_custom_command(TARGET ${target} POST_BUILD
 				COMMAND
 					${CMAKE_COMMAND} -E env "PYTHONPATH=\"${pythonlib_path}\""
-					${python3_exe}
+					${Python3_EXECUTABLE}
 					${sign_script_path}
 					$<TARGET_FILE:${target}>
 				COMMENT "Signing '$<TARGET_FILE:${target}>' ...")
 		endif()
 	endforeach()
 endfunction(aja_code_sign)
+
+function(aja_ntv2_sdk_gen target_deps)
+	add_custom_command(
+		TARGET ${target_deps} PRE_BUILD
+		COMMAND
+			${Python2_EXECUTABLE} ${AJA_NTV2_ROOT}/ajalibraries/ajantv2/sdkgen/ntv2sdkgen.py
+			--verbose --unused --ajantv2 ajalibraries/ajantv2 --ohh ajalibraries/ajantv2/includes --ohpp ajalibraries/ajantv2/src
+		WORKING_DIRECTORY ${AJA_NTV2_ROOT}
+		COMMENT "Running ntv2sdkgen script...")
+endfunction(aja_ntv2_sdk_gen)
