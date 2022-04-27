@@ -37,7 +37,11 @@ endif
 ifdef AJA_IGPU
 	EXTRA_CFLAGS += -DAJA_IGPU=$(AJA_IGPU)
 else
+ifeq ($(NVIDIA_SYMVERS),)
 	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(DIR)/nvidia.symvers
+	NVIDIA_SYMVERS := $(DIR)/nvidia.symvers
+endif
 endif
 endif
 
@@ -152,8 +156,8 @@ ifdef AJA_RDMA
 ifdef AJA_IGPU
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
 else
-	./nvidia-ko-to-module-symvers $(NVIDIA_KO) nvidia.symvers
-	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules KBUILD_EXTRA_SYMBOLS=$(DIR)/nvidia.symvers
+	${NVIDIA_GEN_SYMVERS}
+	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules KBUILD_EXTRA_SYMBOLS=$(NVIDIA_SYMVERS)
 endif
 else
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
