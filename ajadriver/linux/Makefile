@@ -166,6 +166,9 @@ endif
 	if [ -d "$(A_LIBRARIES_PATH)/bin" ]; then cp -f $(A_LIBRARIES_PATH)/bin/*load_ajantv2 $(A_UBER_BIN); fi
 	cp $(NTV2TARGET).ko $(A_UBER_BIN)
 
+modules_install:
+	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) modules_install
+
 all: $(DRIVERINCS) $(DRIVERSRCS) $(HEVCINCS) $(HEVCSRCS) $(RDMAINCS)
 
 # Make a symlink to the C-only CPP files we need in classes.
