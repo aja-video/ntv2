@@ -2834,25 +2834,28 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 
 static UWord deviceNumber;
 
+static int aja_ntv2_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
+{
+	add_uevent_var(env, "DEVMODE=%#o", 0666);
+	return 0;
+}
+
 static int __init aja_ntv2_module_init(void)
 {
 	int res;
 	int i;
 	char versionString[STRMAX];
+	struct class *ntv2_class = NULL;
 
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
 		NTV2Params[i] = NULL;
 	}
 
-	if (getNTV2ModuleParams()->name == NULL)
-	{
-        getNTV2ModuleParams()->name = "ntv2mod";
-	}
-	if (getNTV2ModuleParams()->driverName == NULL)
-	{
-        getNTV2ModuleParams()->driverName = "ajantv2";
-	}
+	memset(getNTV2ModuleParams(), 0, sizeof(*getNTV2ModuleParams()));
+
+	getNTV2ModuleParams()->name = "ntv2mod";
+	getNTV2ModuleParams()->driverName = "ajantv2";
 
 #if defined(AJA_HEVC)
 	hevc_module_init("hevc");
@@ -2880,21 +2883,23 @@ static int __init aja_ntv2_module_init(void)
 	if (res < 0) {
 		MSG("%s: *error* uart_register_driver failed code %d\n",
 			getNTV2ModuleParams()->name, res);
-		return res;
+		goto fail;
 	}
 	getNTV2ModuleParams()->uart_driver = &ntv2_uart_driver;
 	getNTV2ModuleParams()->uart_max = NTV2_MAXBOARDS;
 	atomic_set(&getNTV2ModuleParams()->uart_index, 0);
 
-	// Do the PCI initialization here.  If we do it
-	// later and it fails we have to unregister_chrdev() etc.
-	// Note: this calls the probe function.
-	res = NTV2_LINUX_PCI_REG_DRIVER_FUNC(&ntv2_driver);
-	if (res != 0) {
-		MSG("%s: NTV2_LINUX_PCI_REG_DRIVER_FUNC failed with code %d",
+	// Create device class
+	ntv2_class = class_create(THIS_MODULE, getNTV2ModuleParams()->driverName);
+	if (IS_ERR(ntv2_class))
+	{
+		res = PTR_ERR(ntv2_class);
+		MSG("%s: Failed to create device class; code %d\n",
 			getNTV2ModuleParams()->name, res);
-		return res;
+		goto fail;
 	}
+	ntv2_class->dev_uevent = aja_ntv2_dev_uevent;
+	getNTV2ModuleParams()->class = ntv2_class;
 
 	// register device with kernel
 	MSG("%s: register chrdev %s\n",
@@ -2906,10 +2911,19 @@ static int __init aja_ntv2_module_init(void)
 	{
 		MSG("%s: Can't register device with kernel\n",
 			getNTV2ModuleParams()->name);
-		return res;
+		goto fail;
 	}
 
 	getNTV2ModuleParams()->NTV2Major = res;
+
+	// Register the PCI driver.
+	// Note: this calls the probe function.
+	res = NTV2_LINUX_PCI_REG_DRIVER_FUNC(&ntv2_driver);
+	if (res != 0) {
+		MSG("%s: NTV2_LINUX_PCI_REG_DRIVER_FUNC failed with code %d",
+			getNTV2ModuleParams()->name, res);
+		goto fail;
+	}
 
 	// Set all autocirculators to disabled
 	for (i = 0; i < getNTV2ModuleParams()->numNTV2Devices; i++)
@@ -2941,6 +2955,25 @@ static int __init aja_ntv2_module_init(void)
 	MSG("%s: module init end\n", getNTV2ModuleParams()->name);
 
 	return 0;
+
+fail:
+	if (getNTV2ModuleParams()->NTV2Major)
+	{
+		unregister_chrdev(getNTV2ModuleParams()->NTV2Major,
+			getNTV2ModuleParams()->driverName);
+	}
+
+	if (getNTV2ModuleParams()->class)
+	{
+		class_destroy(getNTV2ModuleParams()->class);
+	}
+
+	if (getNTV2ModuleParams()->uart_driver)
+	{
+		uart_unregister_driver(getNTV2ModuleParams()->uart_driver);
+	}
+
+	return res;
 }
 
 static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New device inserted */
@@ -2955,6 +2988,10 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	Ntv2Status status;
 	bool isKonaIP = false;
 	bool linuxSerial = false;
+#if defined(AJA_CREATE_DEVICE_NODES)
+	dev_t dev;
+	struct device *device = NULL;
+#endif
 
 #if defined(AJA_HEVC)
 	if (id->vendor == HEVC_VENDOR_ID)
@@ -3394,6 +3431,28 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	// Enable DMA
 	dmaEnable(deviceNumber);
 
+#if defined(AJA_CREATE_DEVICE_NODES)
+	// Create the device node
+	dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
+	cdev_init(&NTV2Params[deviceNumber]->cdev, &ntv2_fops);
+	res = cdev_add(&NTV2Params[deviceNumber]->cdev, dev, 1);
+	if (res < 0)
+	{
+		MSG("%s: Failed to add cdev to subsystem\n", getNTV2ModuleParams()->name);
+		return res;
+	}
+
+	device = device_create(getNTV2ModuleParams()->class, NULL, dev,
+		NULL, "ajantv2%d", deviceNumber);
+	if (IS_ERR(device))
+	{
+		MSG("%s: Failed to create device node\n", getNTV2ModuleParams()->name);
+		return PTR_ERR(device);
+	}
+	MSG("%s: Created device node /dev/ajantv2%d\n",
+		getNTV2ModuleParams()->name, deviceNumber);
+#endif
+
 	deviceNumber++;
 
 	MSG("%s: probe end\n", ntv2pp->name);
@@ -3503,6 +3562,19 @@ static void __exit aja_ntv2_module_cleanup(void)
 		pci_resources_release(ntv2pp);
 	}		// end of for i loop
 
+#if defined(AJA_CREATE_DEVICE_NODES)
+	// Destroy the device nodes
+	for (i = 0; i < NTV2_MAXBOARDS; i++)
+	{
+		if (NTV2Params[i] != NULL)
+		{
+			dev_t dev = MKDEV(getNTV2ModuleParams()->NTV2Major, i);
+			device_destroy(getNTV2ModuleParams()->class, dev);
+			cdev_del(&NTV2Params[i]->cdev);
+		}
+	}
+#endif
+
 	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
 	remove_proc_entry("driver/aja", NULL /* parent dir */);
 
@@ -3516,6 +3588,8 @@ static void __exit aja_ntv2_module_cleanup(void)
 	}
 
    	pci_unregister_driver(&ntv2_driver);
+
+	class_destroy(getNTV2ModuleParams()->class);
 
 	uart_unregister_driver(&ntv2_uart_driver);
 
