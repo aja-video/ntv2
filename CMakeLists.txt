@@ -60,7 +60,7 @@ if (AJA_BUILD_NONAJA AND EXISTS ${NON_AJA_ROOT})
 endif()
 
 # Install NTV2 CMake files
-if (AJA_INSTALL_HEADERS OR AJA_INSTALL_SOURCES)
+if (AJA_INSTALL_SOURCES)
     install(FILES cmake/AJABuildOptions.cmake                DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake)
     install(FILES cmake/AJACommonDefines.cmake               DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake)
     install(FILES cmake/AJACommonFlags.cmake                 DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake)
