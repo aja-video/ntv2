@@ -1,7 +1,5 @@
 project(ntv2burn4kquadrant)
 
-message("added ntv2burn4kquadrant")
-
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -45,10 +43,16 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${NTV2BURN4KQUADRANT_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn4kquadrant)
 	install(FILES ${NTV2BURN4KQUADRANT_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn4kquadrant)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn4kquadrant)
 endif()
 
 install(TARGETS ntv2burn4kquadrant
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX})
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(ntv2burn4kquadrant)
+endif()

@@ -1,7 +1,5 @@
 project(ntv2firmwareinstaller)
 
-message("added ntv2firmwareinstaller")
-
 set(DEMO_APPS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../demoapps)
 
 set(TARGET_INCLUDE_DIRS
@@ -48,10 +46,16 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${AJA_NTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/utilityfiles/public)
 	install(FILES ${NTV2FIRMWAREINSTALLER_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/ntv2firmwareinstaller)
 	install(FILES ${NTV2FIRMWAREINSTALLER_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/ntv2firmwareinstaller)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/ntv2firmwareinstaller)
 endif()
 
 install(TARGETS ntv2firmwareinstaller
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX})
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(ntv2firmwareinstaller)
+endif()
