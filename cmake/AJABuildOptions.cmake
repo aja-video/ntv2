@@ -36,7 +36,7 @@ option(AJA_BUILD_QT_BASED "Build NTV2 Demos and Apps which depend upon Qt?" ON)
 option(AJA_BUILD_SHARED "Build NTV2 shared libraries?" OFF)
 option(AJA_CODE_SIGN "Code sign binary outputs?" OFF) # for AJA internal CI builds only
 option(AJA_DEPLOY_LIBS "Deploy dependency libraries (DLL/dylib) into the .exe output directory (Win32) or .app bundle (macOS)?" OFF)
-option(AJA_INSTALL_SOURCES "Deploy sources into build output directory?" ON)
+option(AJA_INSTALL_SOURCES "Deploy sources into build output directory?" OFF)
 option(AJA_INSTALL_HEADERS "Deploy headers into build output directory?" ON)
 option(AJA_NTV2_SDK_GEN "Run the ajantv2 `sdkgen` script before building (not available in NTV2 open-source)?" OFF)
 option(AJA_USE_CLANG "Build NTV2 SDK with LLVM Clang compiler?" OFF)
