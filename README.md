@@ -115,22 +115,26 @@ the default system install paths will be used (`/usr/local` on UNIX and `c:/Prog
 See https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html for more information.
 
 ### Linux example
-```
-#!/bin/bash
-NTV2_DIR=$PWD
-NTV2_INSTALL_DIR=ntv2-install
-QT_DIR=/opt/Qt5.13.2/5.13.2/gcc_64
 
-rm -rf ${NTV2_INSTALL_DIR} && \
-rm -rf ninja && mkdir ninja && pushd ninja && \
-cmake -DCMAKE_BUILD_TYPE=Debug -GNinja \
--DAJA_INSTALL_HEADERS=ON -DAJA_INSTALL_SOURCES=ON \
--DCMAKE_INSTALL_PREFIX="${NTV2_DIR}/${NTV2_INSTALL_DIR}" \
--DAJA_DEPLOY_LIBS=ON -DAJA_QT_DIR=${QT_DIR} \
--DAJA_BUILD_OPENSOURCE=ON .. && \
-ninja -f build.ninja && \
-cmake --install ajaapps && \
-cmake --install ajadriver && \
-cmake --install ajalibraries/ajantv2 && \
-popd
+Run from the root of the ntv2 repo. CMake Install deploys output files to a sub-directory called `ntv2-install`.
+
+```
+#!/bin/sh
+NTV2_DIR=$PWD
+BUILD_DIR=ntv2-build
+INSTALL_DIR=ntv2-install
+
+rm -rf ${INSTALL_DIR}
+rm -rf ${BUILD_DIR}
+
+cmake -S . -B${BUILD_DIR} \
+-DCMAKE_BUILD_TYPE=Debug \
+-DAJA_INSTALL_HEADERS=ON \
+-DAJA_INSTALL_SOURCES=ON \
+-DCMAKE_INSTALL_PREFIX="${NTV2_DIR}/${INSTALL_DIR}" \
+-DAJA_DEPLOY_LIBS=ON \
+-DAJA_BUILD_OPENSOURCE=ON
+
+cmake --build ${BUILD_DIR} -- -j$(nproc>&1)
+cmake --install ${BUILD_DIR}
 ```
