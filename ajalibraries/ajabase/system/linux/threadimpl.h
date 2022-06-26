@@ -13,6 +13,7 @@
 #include "ajabase/common/common.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/system/lock.h"
+#include <string>
 
 
 class AJAThreadImpl
@@ -59,6 +60,8 @@ public:
 	bool				mExiting;
 	pthread_mutex_t		mExitMutex;
 	pthread_cond_t		mExitCond;
+
+	std::string mThreadName;
 };
 
 #endif	//	AJA_THREAD_IMPL_H
