@@ -538,6 +538,8 @@ AJAThreadImpl::ThreadProcStatic(void* pThreadImplContext)
 	if (errno == 0)							// theoretically gettid() cannot fail, so by extension syscall(SYS_gettid) can't either...?
 		pThreadImpl->mTid = myTid;
 
+	if (pThreadImpl->mThreadName.size() > 0)
+		pthread_setname_np(pThreadImpl->mThread, pThreadImpl->mThreadName.c_str());
 
 	// signal parent we've started
 	int rc = pthread_mutex_lock(&pThreadImpl->mStartMutex);
@@ -609,11 +611,12 @@ AJAThreadImpl::ThreadProcStatic(void* pThreadImplContext)
 }
 
 AJAStatus AJAThreadImpl::SetThreadName(const char *name) {
-	int ret = prctl(PR_SET_NAME, (unsigned long)name, 0, 0);
-	if(ret == -1) {
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "Failed to set thread name to %s", name);
-		return AJA_STATUS_FAIL;
-	}
+	AJAAutoLock lock(&mLock);
+	mThreadName = name;
+	if (mThreadName.size() > 15)
+		mThreadName.resize(15);
+	if (mThread > 0)
+		pthread_setname_np(mThread, mThreadName.c_str());
 	return AJA_STATUS_SUCCESS;
 }
 
