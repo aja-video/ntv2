@@ -990,7 +990,7 @@ bool CNTV2DriverInterface::BitstreamStatus (NTV2ULWordVector & outRegValues)
 void CNTV2DriverInterface::FinishOpen (void)
 {
 	// HACK! FinishOpen needs frame geometry to determine frame buffer size and number.
-	NTV2FrameGeometry fg;
+	NTV2FrameGeometry fg{};
 	ULWord val1(0), val2(0);
 	ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);	//	Read FrameGeometry
 	ReadRegister (kRegCh1Control, val1, kRegMaskFrameFormat, kRegShiftFrameFormat); //	Read PixelFormat
@@ -1075,10 +1075,18 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 	headerError = fileInfo.ParseHeaderFromBuffer(bitFileHdrBuffer);
 	if (headerError.empty())
 	{
-		::strncpy(bitFileInfo.dateStr, fileInfo.GetDate().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
-		::strncpy(bitFileInfo.timeStr, fileInfo.GetTime().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
-		::strncpy(bitFileInfo.designNameStr, fileInfo.GetDesignName().c_str(), NTV2_BITFILE_DESIGNNAME_STRINGLENGTH);
-		::strncpy(bitFileInfo.partNameStr, fileInfo.GetPartName().c_str(), NTV2_BITFILE_PARTNAME_STRINGLENGTH);
+		::strncpy(bitFileInfo.dateStr, fileInfo.GetDate().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH - 1);
+		bitFileInfo.dateStr[NTV2_BITFILE_DATETIME_STRINGLENGTH - 1] = '\0';
+
+		::strncpy(bitFileInfo.timeStr, fileInfo.GetTime().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH - 1);
+		bitFileInfo.timeStr[NTV2_BITFILE_DATETIME_STRINGLENGTH - 1] = '\0';
+
+		::strncpy(bitFileInfo.designNameStr, fileInfo.GetDesignName().c_str(), NTV2_BITFILE_DESIGNNAME_STRINGLENGTH - 1);
+		bitFileInfo.designNameStr[NTV2_BITFILE_DESIGNNAME_STRINGLENGTH - 1] = '\0';
+
+		::strncpy(bitFileInfo.partNameStr, fileInfo.GetPartName().c_str(), NTV2_BITFILE_PARTNAME_STRINGLENGTH - 1);
+		bitFileInfo.partNameStr[NTV2_BITFILE_PARTNAME_STRINGLENGTH - 1] = '\0';
+
 		bitFileInfo.numBytes = ULWord(fileInfo.GetProgramStreamLength());
 	}
 	return headerError.empty();

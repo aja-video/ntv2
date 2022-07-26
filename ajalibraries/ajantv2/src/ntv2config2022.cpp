@@ -1623,7 +1623,7 @@ bool CNTV2Config2022::GetLinkStatus(eSFP sfp, SFPStatus & sfpStatus)
 
 bool CNTV2Config2022::Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChannelStatus & chanStatus)
 {
-	uint32_t addr;
+	uint32_t addr = 0;
 
 	SelectRxChannel(channel, SFP_2, addr);
 	ReadChannelRegister(addr + kReg2022_6_rx_sec_recv_pkt_cnt, &chanStatus.sfp2RxPackets);

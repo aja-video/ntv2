@@ -244,8 +244,12 @@ NTV2NubPkt * BuildNubBasePacket (NTV2NubProtocolVersion protocolVersion,
 	pPkt->hdr.dataLength		= dataSize;
 
 	char *p (reinterpret_cast<char*>(pPkt->data));	// Work around ISO C++ forbids zero-size array
-	ULWord len (ULWord(::strlen(queryRespStr)) + 1);
-	::strncpy(p, queryRespStr, len);	// Copy in query/resp string incl. terminating null
+	
+	constexpr const size_t len = sizeof(pPkt->data);
+	
+	::strncpy(p, queryRespStr, len - 1); 	// Copy in query/resp string incl. terminating null
+	p[len - 1] = '\0';
+	
 	p += len;
 	*pPayload = p;
 	return pPkt;

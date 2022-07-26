@@ -175,8 +175,10 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 		currentBitfileVersion	= 0xff; // ignores bitfile version
 	}
 
-	if (!currentDesignID)
-		{DDFAIL("Current design ID is zero for " << oldDevName);  return false;}
+	if (currentDesignID == 0)
+	{
+		return false;
+	}
 
 	//	Get the clear file matching current bitfile...
 	NTV2_POINTER clearStream;

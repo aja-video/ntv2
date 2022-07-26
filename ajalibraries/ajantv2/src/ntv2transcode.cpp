@@ -283,7 +283,7 @@ void ConvertLinetoRGB(UByte * ycbcrBuffer,
 					  bool fUseSDMatrix,
 					  bool fUseSMPTERange)
 {
-	YCbCrAlphaPixel ycbcrPixel;
+	YCbCrAlphaPixel ycbcrPixel{};
 	UWord Cb1,Y1,Cr1,Cb2,Y2,Cr2;
 
 	// take a line(CbYCrYCbYCrY....) to RGBAlphaPixels.

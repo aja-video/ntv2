@@ -859,7 +859,7 @@ ostream & operator << (ostream & inOutStream, const NTV2RegisterValueMap & inObj
 	inOutStream << "RegValues:" << inObj.size () << "[";
 	while (iter != inObj.end ())
 	{
-		const NTV2RegisterNumber	registerNumber	(static_cast <const NTV2RegisterNumber> (iter->first));
+		const NTV2RegisterNumber	registerNumber	(static_cast <NTV2RegisterNumber> (iter->first));
 		const ULWord				registerValue	(iter->second);
 		inOutStream << ::NTV2RegisterNumberToString (registerNumber) << "=0x" << hex << registerValue << dec;
 		if (++iter != inObj.end ())
@@ -2309,7 +2309,8 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 
 	for (UWord ndx (0);	 ndx < UWord(maxNumValues);	 ndx++)
 	{
-		const NTV2TCIndex		tcIndex (static_cast<const NTV2TCIndex>(ndx));
+		const NTV2TCIndex		tcIndex	(static_cast<NTV2TCIndex>(ndx));
+
 		NTV2TimeCodesConstIter	iter	(inValues.find(tcIndex));
 		pArray[ndx] = (iter != inValues.end())	?  iter->second	 :	INVALID_TIMECODE_VALUE;
 	}	//	for each possible NTV2TCSource value

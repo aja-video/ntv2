@@ -9,10 +9,6 @@
 #ifndef NTV2DEVICEFEATURES_H
 #define NTV2DEVICEFEATURES_H
 
-#if defined(AJALinux) || defined(AJA_LINUX)
-	#include <stddef.h>		// For size_t
-#endif
-
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2enums.h"
