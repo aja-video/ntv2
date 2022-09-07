@@ -455,6 +455,10 @@ static struct pci_device_id pci_device_id_tab[] =
 	{ 0, 0, 0, 0, 0, 0, 0 }								// Array terminator
 };
 
+#if defined(AJA_CREATE_DEVICE_NODES)
+MODULE_DEVICE_TABLE(pci, pci_device_id_tab);
+#endif
+
 static struct pci_driver ntv2_driver;
 
 static int reboot_handler(struct notifier_block *this, unsigned long code, void *x);
