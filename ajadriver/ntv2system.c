@@ -1513,7 +1513,7 @@ bool ntv2DmaMemoryAlloc(Ntv2DmaMemory* pDmaMemory, Ntv2SystemContext* pSysCon, u
 	   (pSysCon->pDevice == NULL) ||
 	   (size == 0)) return false;
 
-	pAddress = pci_alloc_consistent(pSysCon->pDevice, size, &dmaAddress);
+	pAddress = dma_alloc_coherent(&pSysCon->pDevice->dev, size, &dmaAddress, GFP_ATOMIC);
 	if((pAddress == NULL) || (dmaAddress == 0)) return false;
 
 	// initialize memory data structure
@@ -1534,7 +1534,7 @@ void ntv2DmaMemoryFree(Ntv2DmaMemory* pDmaMemory)
 	   (pDmaMemory->dmaAddress == 0) ||
 	   (pDmaMemory->size == 0)) return;
 
-	pci_free_consistent(pDmaMemory->pDevice,
+	dma_free_coherent(&pDmaMemory->pDevice->dev,
 						pDmaMemory->size,
 						pDmaMemory->pAddress,
 						pDmaMemory->dmaAddress);

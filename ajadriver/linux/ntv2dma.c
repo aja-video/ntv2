@@ -473,9 +473,10 @@ int dmaInit(ULWord deviceNumber)
 			for (iDes = 0; iDes < pDmaEngine->numDescriptorPages; iDes++)
 			{
 				pDmaEngine->pDescriptorVirtual[iDes] =
-					pci_alloc_consistent(pNTV2Params->pci_dev,
+					dma_alloc_coherent(&pNTV2Params->pci_dev->dev,
 										 PAGE_SIZE,
-										 &pDmaEngine->descriptorPhysical[iDes]);
+										 &pDmaEngine->descriptorPhysical[iDes],
+										 GFP_ATOMIC);
 				if ((pDmaEngine->pDescriptorVirtual[iDes] == NULL) ||
 					(pDmaEngine->descriptorPhysical[iDes] == 0))
 				{
@@ -556,7 +557,7 @@ static void dmaFreeEngine(PDMA_ENGINE pDmaEngine)
 		if ((pDmaEngine->pDescriptorVirtual[iDes] != NULL) &&
 			(pDmaEngine->descriptorPhysical[iDes] != 0))
 		{
-			pci_free_consistent(pNTV2Params->pci_dev,
+			dma_free_coherent(&pNTV2Params->pci_dev->dev,
 								PAGE_SIZE,
 								pDmaEngine->pDescriptorVirtual[iDes],
 								pDmaEngine->descriptorPhysical[iDes]);
@@ -914,7 +915,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 			pDmaContext->dmaC2H = pDmaParams->toHost;
 		}
 		dmaC2H = pDmaContext->dmaC2H;
-		direction = dmaC2H? PCI_DMA_FROMDEVICE : PCI_DMA_TODEVICE;
+		direction = dmaC2H? DMA_FROM_DEVICE : DMA_TO_DEVICE;
 
 		// do nothing by default
 		pDmaContext->pVideoPageBuffer = NULL;
@@ -2282,7 +2283,7 @@ int dmaPageRootAdd(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 	}
 	
 	// lock buffer 
-	ret = dmaPageLock(deviceNumber, pBuffer, pAddress, size, PCI_DMA_BIDIRECTIONAL);
+	ret = dmaPageLock(deviceNumber, pBuffer, pAddress, size, DMA_BIDIRECTIONAL);
 	if (ret < 0)
 	{
 		kfree(pBuffer);
@@ -2655,7 +2656,7 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 	}
 
 	// determine if buffer will be written
-	write = (direction == PCI_DMA_BIDIRECTIONAL) || (direction == PCI_DMA_FROMDEVICE);
+	write = (direction == DMA_BIDIRECTIONAL) || (direction == DMA_FROM_DEVICE);
 
 	// get the map semaphore
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0))
@@ -2785,7 +2786,7 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 		// release the locked pages
 		for (i = 0; i < pBuffer->numPages; i++)
 		{
-			if ((pBuffer->direction == PCI_DMA_FROMDEVICE) &&
+			if ((pBuffer->direction == DMA_FROM_DEVICE) &&
 				!PageReserved(pBuffer->pPageList[i]))
 			{
 				set_page_dirty(pBuffer->pPageList[i]);
@@ -2907,7 +2908,7 @@ static int dmaSgMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 			ret = nvidia_p2p_dma_map_pages(&(pNTV2Params->pci_dev)->dev,
 										   pBuffer->rdmaPage,
 										   &pBuffer->rdmaMap,
-										   (pBuffer->direction == PCI_DMA_TODEVICE)? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+										   (pBuffer->direction == DMA_TO_DEVICE)? DMA_TO_DEVICE : DMA_FROM_DEVICE);
 #else
 			ret = nvidia_p2p_dma_map_pages(pNTV2Params->pci_dev,
 										   pBuffer->rdmaPage,
