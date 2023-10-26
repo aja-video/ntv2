@@ -170,6 +170,9 @@ static void ntv2_uartops_shutdown(struct uart_port *port)
 
 static void ntv2_uartops_set_termios(struct uart_port *port,
 									 struct ktermios *termios,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,0,0)
+									 const
+#endif
 									 struct ktermios *old)
 {
 	struct ntv2_serial *ntv2_ser = container_of(port, struct ntv2_serial, uart_port);
