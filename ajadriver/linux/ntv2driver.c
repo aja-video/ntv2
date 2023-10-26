@@ -4388,9 +4388,9 @@ pci_resources_config (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
 	// a 64-bit mask from a previous driver load.
 
 #if defined(DMA_BIT_MASK)
-	if((res = pci_set_dma_mask(pdev, DMA_BIT_MASK(32))) != 0)
+	if((res = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32))) != 0)
 #else
-	if((res = pci_set_dma_mask(pdev, DMA_32BIT_MASK)) != 0)
+	if((res = dma_set_mask(&pdev->dev, DMA_32BIT_MASK)) != 0)
 #endif
 	{
 	   MSG("%s: Unable to set DMA mask.  Disabling this board.\n",
@@ -4694,9 +4694,9 @@ dma_registers_init (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
 	}
 
 #if defined(DMA_BIT_MASK)
-	if(!pci_set_dma_mask(pdev, DMA_BIT_MASK(64)))
+	if(!dma_set_mask(&pdev->dev, DMA_BIT_MASK(64)))
 #else
-	if(!pci_set_dma_mask(pdev, DMA_64BIT_MASK))
+	if(!dma_set_mask(&pdev->dev, DMA_64BIT_MASK))
 #endif
 	{
 		MSG("%s: Using 64-bit DMA mask with 64-bit capable firmware\n",
