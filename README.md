@@ -1,3 +1,5 @@
+# ⚠ **This repository is deprecated as of 12/11/2023. Please use https://github.com/aja-video/libajantv2** ⚠
+
 # AJA NTV2 SDK (MIT license)
 
 ## Building the ajantv2 library with [CMake](https://cmake.org/) and [ninja build](https://ninja-build.org/) on Windows/macOS/Linux
