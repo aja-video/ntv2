@@ -3234,7 +3234,8 @@ private:
 	struct DecodeHDMIOutputStatus : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{	(void) inRegNum; (void) inDeviceID;
+		{	(void) inRegNum;
+			(void)inDeviceID;
 			const NTV2HDMIOutputStatus stat (inRegValue);
 			ostringstream	oss;
 			stat.Print(oss);
@@ -3329,7 +3330,10 @@ private:
 	struct DecodeHDMIOutMRControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{	(void) inRegNum;  (void) inDeviceID;
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+
 			ostringstream	oss;
 			static const string sMRStandard[]	=	{	"1080i",	"720p", "480i", "576i", "1080p",	"1556i",	"2Kx1080p", "2Kx1080i", "UHD",	"4K", "", "", "", "", "", "" };
 			const ULWord	rawVideoStd		(inRegValue & kRegMaskMRStandard);
