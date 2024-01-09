@@ -2838,18 +2838,22 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 
 static UWord deviceNumber;
 
+#if defined(AJA_CREATE_DEVICE_NODES)
 static int aja_ntv2_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
 {
 	add_uevent_var(env, "DEVMODE=%#o", 0666);
 	return 0;
 }
+#endif
 
 static int __init aja_ntv2_module_init(void)
 {
 	int res;
 	int i;
 	char versionString[STRMAX];
+#if defined(AJA_CREATE_DEVICE_NODES)
 	struct class *ntv2_class = NULL;
+#endif
 
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
@@ -2893,6 +2897,7 @@ static int __init aja_ntv2_module_init(void)
 	getNTV2ModuleParams()->uart_max = NTV2_MAXBOARDS;
 	atomic_set(&getNTV2ModuleParams()->uart_index, 0);
 
+#if defined(AJA_CREATE_DEVICE_NODES)
 	// Create device class
 	ntv2_class = class_create(THIS_MODULE, getNTV2ModuleParams()->driverName);
 	if (IS_ERR(ntv2_class))
@@ -2904,6 +2909,7 @@ static int __init aja_ntv2_module_init(void)
 	}
 	ntv2_class->dev_uevent = aja_ntv2_dev_uevent;
 	getNTV2ModuleParams()->class = ntv2_class;
+#endif
 
 	// register device with kernel
 	MSG("%s: register chrdev %s\n",
@@ -2967,10 +2973,12 @@ fail:
 			getNTV2ModuleParams()->driverName);
 	}
 
+#if defined(AJA_CREATE_DEVICE_NODES)
 	if (getNTV2ModuleParams()->class)
 	{
 		class_destroy(getNTV2ModuleParams()->class);
 	}
+#endif
 
 	if (getNTV2ModuleParams()->uart_driver)
 	{
@@ -3593,7 +3601,9 @@ static void __exit aja_ntv2_module_cleanup(void)
 
    	pci_unregister_driver(&ntv2_driver);
 
+#if defined(AJA_CREATE_DEVICE_NODES)
 	class_destroy(getNTV2ModuleParams()->class);
+#endif
 
 	uart_unregister_driver(&ntv2_uart_driver);
 
