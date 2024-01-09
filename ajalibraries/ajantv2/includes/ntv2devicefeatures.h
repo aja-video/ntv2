@@ -9,7 +9,9 @@
 #ifndef NTV2DEVICEFEATURES_H
 #define NTV2DEVICEFEATURES_H
 
-#if defined(AJALinux) || defined(AJA_LINUX)
+#if defined(XENA2)
+	#include <linux/stddef.h>		// For size_t
+#elif defined(AJALinux) || defined(AJA_LINUX)
 	#include <stddef.h>		// For size_t
 #endif
 
